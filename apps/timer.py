@@ -86,4 +86,10 @@ result_label.pack(pady=10)
 # Vincular eventos de teclado a toda la aplicación
 root.bind_all("<KeyPress>", on_key_press)
 
-root.mainloop()
+def main():
+    global label, cube_entry, result_label
+    # Iniciar el bucle principal de la aplicación
+    root.mainloop()
+
+if __name__ == "__main__":
+    root.mainloop()

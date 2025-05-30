@@ -7,23 +7,20 @@ def main():
     parser.add_argument("app", choices=["timer", "translator", "tictactoe"], help="Aplicación a ejecutar")
     parser.add_argument("--lang", type=str, default="", help="Idioma de traducción")
     parser.add_argument("--num", type=int, default=1, help="Partidas necesarias en Tic Tac Toe")
-    parser.add_argument("--lay", type=str, default="3x3", help="Algoritmo de mezcla")
     parser.add_argument("--mode", type=str, choices=["line", "file"], default="line", help="Modo de traducción: 'line' para una línea, 'file' para archivo")
     parser.add_argument("--filepath", type=str, default="", help="Ruta del archivo a traducir (si mode=file)")
 
     args = parser.parse_args()
 
     if args.app == "timer":
-        start_timer(args.lay)
+        start_timer()
     elif args.app == "translator":
         start_translator(args.lang, args.mode, args.filepath)
     elif args.app == "tictactoe":
         start_tictactoe(args.num)
 
-def start_timer(cube_type):
+def start_timer():
     timer.main()
-    # si el usuario aprieta space/enter iniciar/parar tiempo
-    # retornar el tiempo final
 
 def start_translator(lang, mode, filepath):
     if mode == "line":

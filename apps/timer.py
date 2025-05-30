@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.messagebox as messagebox
 import random
 import sys
 import time
@@ -43,9 +44,25 @@ def get_cube_info(size):
 # Variables globales
 press_time = None
 running = False
+times_list = []
+best_time = None
+
+
+def actualizar_etiquetas():
+    if times_list:
+        times_label.config(text=f"Tiempos registrados: {[f'{t:.2f}' for t in times_list]}")
+        average = sum(times_list) / len(times_list)
+        average_time_label.config(text=f"Tiempo promedio: {average:.2f} segundos")
+    else:
+        times_label.config(text="Tiempos registrados: []")
+        average_time_label.config(text="Tiempo promedio: --")
+    if best_time is not None:
+        best_time_label.config(text=f"Mejor tiempo: {best_time:.2f} segundos")
+    else:
+        best_time_label.config(text="Mejor tiempo: No hay récord aún")
 
 def on_key_press(event):
-    global press_time, running
+    global press_time, running, times_list, best_time
     if event.keysym == "space":
         if not running:
             press_time = time.time()
@@ -54,7 +71,12 @@ def on_key_press(event):
         else:
             elapsed = time.time() - press_time
             label.config(text=f"Tiempo: {elapsed:.2f} segundos")
+            times_list.append(elapsed)
+            if best_time is None or elapsed < best_time:
+                best_time = elapsed
+                messagebox.showinfo("Nuevo récord", f"¡Nuevo mejor tiempo: {best_time:.2f} segundos!")
             running = False
+            actualizar_etiquetas()
 
 # Creación de la ventana
 root = tk.Tk()
@@ -83,11 +105,20 @@ button.pack(pady=10)
 result_label = tk.Label(root, text="", font=("Arial", 10), wraplength=300)
 result_label.pack(pady=10)
 
+best_time_label = tk.Label(root, text="Mejor tiempo: No hay récord aún", font=("Arial", 10))
+best_time_label.pack(pady=10)
+
+average_time_label = tk.Label(root, text="Tiempo promedio: --", font=("Arial", 10))
+average_time_label.pack(pady=10)
+
+times_label = tk.Label(root, text="Tiempos registrados: []", font=("Arial", 10))
+times_label.pack(pady=10)
+
 # Vincular eventos de teclado a toda la aplicación
 root.bind_all("<KeyPress>", on_key_press)
 
 def main():
-    global label, cube_entry, result_label
+    global label, cube_entry, result_label, best_time_label, average_time_label, times_label
     # Iniciar el bucle principal de la aplicación
     root.mainloop()
 

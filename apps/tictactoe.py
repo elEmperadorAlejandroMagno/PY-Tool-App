@@ -1,7 +1,10 @@
+from translations.translations import get_translations as translations
+
 class TicTacToe:
-    def __init__(self):
+    def __init__(self, t):
         self.board = [[" " for _ in range(3)] for _ in range(3)]
         self.current_player = "X"
+        self.t = t
 
     def print_board(self):
         print(" ")
@@ -36,25 +39,26 @@ class TicTacToe:
             self.board[row][col] = self.current_player
             return True
         else:
-            print("Cell already taken, try again.")
+            print(self.t["cell_taken"])
             return False
 
 class GameManager:
-    def __init__(self, num_games=1):
+    def __init__(self, t, num_games=1):
         self.num_games = num_games
         self.won_games = {"X": 0, "O": 0}
+        self.t = t
 
     def play(self):
         while self.won_games["X"] < (self.num_games // 2) + 1 and self.won_games["O"] < (self.num_games // 2) + 1:
-            game = TicTacToe()
+            game = TicTacToe(self.t)
             while True:
                 game.print_board()
-                print(f"Best of: {self.num_games} games")
+                print(f"{self.t['best_of']} {self.num_games} {self.t['games']}")
                 try:
-                    row = int(input(f"Player {game.current_player}, enter the row (0-2): "))
-                    col = int(input(f"Player {game.current_player}, enter the column (0-2): "))
+                    row = int(input(f"{self.t['player']} {game.current_player}, {self.t['enter_row']} (0-2): "))
+                    col = int(input(f"{self.t['player']} {game.current_player}, {self.t['enter_col']} (0-2): "))
                 except ValueError:
-                    print("Please enter valid numbers between 0 and 2.")
+                    print(self.t["valid_numbers"])
                     continue
 
                 if 0 <= row <= 2 and 0 <= col <= 2:
@@ -62,24 +66,40 @@ class GameManager:
                         winner = game.check_winner()
                         if winner:
                             game.print_board()
-                            print(f"Player {winner} wins this game!")
+                            print(f"{self.t['player']} {winner} {self.t['wins_game']}")
                             self.won_games[winner] += 1
                             break
                         if game.is_board_full():
                             game.print_board()
-                            print("It's a draw!")
+                            print(self.t["draw"])
                             break
                         game.switch_player()
                 else:
-                    print("Please enter numbers between 0 and 2.")
+                    print(self.t["valid_numbers"])
 
         overall_winner = "X" if self.won_games["X"] > self.won_games["O"] else "O"
-        print(f"Player {overall_winner} wins best of {self.num_games} games!")
+        print(f"{self.t['player']} {overall_winner} {self.t['wins_best_of']} {self.num_games} {self.t['games']}!")
 
-if __name__ == "__main__":
+def main(lang="en"):
+    t = translations.get(lang, translations["en"])["tictactoe"]
+    # Textos adicionales para mensajes
+    t.setdefault("player", t.get("player1", "Player"))
+    t.setdefault("enter_row", "enter the row")
+    t.setdefault("enter_col", "enter the column")
+    t.setdefault("valid_numbers", "Please enter valid numbers between 0 and 2.")
+    t.setdefault("cell_taken", "Cell already taken, try again.")
+    t.setdefault("wins_game", "wins this game!")
+    t.setdefault("draw", "It's a draw!")
+    t.setdefault("best_of", "Best of:")
+    t.setdefault("games", "games")
+    t.setdefault("wins_best_of", "wins best of")
+
     try:
-        num_games = int(input("Enter the number of games (best of N): "))
+        num_games = int(input(f"{t['best_of']} N: "))
     except ValueError:
         num_games = 1
-    manager = GameManager(num_games)
+    manager = GameManager(t, num_games)
     manager.play()
+
+if __name__ == "__main__":
+    main()

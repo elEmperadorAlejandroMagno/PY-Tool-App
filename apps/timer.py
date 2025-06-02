@@ -1,8 +1,9 @@
 import tkinter as tk
 import tkinter.messagebox as messagebox
 import random
-import sys
 import time
+from translations.translations import get_translations as translations
+t =  translations["en"]["timer"]
 
 cubes = [
     {
@@ -47,80 +48,73 @@ running = False
 times_list = []
 best_time = None
 
-
 def actualizar_etiquetas():
     if times_list:
-        times_label.config(text=f"Tiempos registrados: {[f'{t:.2f}' for t in times_list]}")
+        times_label.config(text=f"{t['recorded_times']}: {[f'{tiempo:.2f}' for tiempo in times_list]}")
         average = sum(times_list) / len(times_list)
-        average_time_label.config(text=f"Tiempo promedio: {average:.2f} segundos")
+        average_time_label.config(text=f"{t['average_time']}: {average:.2f} segundos")
     else:
-        times_label.config(text="Tiempos registrados: []")
-        average_time_label.config(text="Tiempo promedio: --")
+        times_label.config(text=f"{t['recorded_times']}: []")
+        average_time_label.config(text=f"{t['average_time']}: --")
     if best_time is not None:
-        best_time_label.config(text=f"Mejor tiempo: {best_time:.2f} segundos")
+        best_time_label.config(text=f"{t['best_time']}: {best_time:.2f} segundos")
     else:
-        best_time_label.config(text="Mejor tiempo: No hay récord aún")
+        best_time_label.config(text=f"{t['best_time']}: {t['no_record']}")
 
 def on_key_press(event):
     global press_time, running, times_list, best_time
     if event.keysym == "space":
         if not running:
             press_time = time.time()
-            label.config(text="Cronómetro corriendo...")
+            label.config(text=t["press_space"])
             running = True
         else:
             elapsed = time.time() - press_time
-            label.config(text=f"Tiempo: {elapsed:.2f} segundos")
+            label.config(text=f"{t['best_time']}: {elapsed:.2f} segundos")
             times_list.append(elapsed)
             if best_time is None or elapsed < best_time:
                 best_time = elapsed
-                messagebox.showinfo("Nuevo récord", f"¡Nuevo mejor tiempo: {best_time:.2f} segundos!")
+                messagebox.showinfo(t["best_time"], f"¡{t['best_time']}: {best_time:.2f} segundos!")
             running = False
             actualizar_etiquetas()
-
-# Creación de la ventana
-root = tk.Tk()
-root.title("Cronómetro & Algoritmo")
-
-# Etiqueta para mostrar el cronómetro
-label = tk.Label(root, text="Presiona y mantén el espacio", font=("Arial", 12))
-label.pack(pady=20)
-
-# Campo de entrada para el tamaño del cubo
-entry_label = tk.Label(root, text="Ingrese tamaño del cubo (Ej: 3x3):", font=("Arial", 10))
-entry_label.pack(pady=10)
-cube_entry = tk.Entry(root)
-cube_entry.pack(pady=5)
 
 # Botón para generar algoritmo
 def show_algorithm():
     cube_type = cube_entry.get().strip()
     algorithm = generate_algorithm(cube_type)
-    result_label.config(text=f"Algoritmo generado: {algorithm}")
+    result_label.config(text=f"{t['generate_algorithm']}: {algorithm}")
 
-button = tk.Button(root, text="Generar algoritmo", command=show_algorithm)
-button.pack(pady=10)
+def main(lang):
+    global t, label, cube_entry, result_label, best_time_label, average_time_label, times_label
+    t = translations.get(lang, translations["en"])["timer"]
 
-# Etiqueta para mostrar el algoritmo generado
-result_label = tk.Label(root, text="", font=("Arial", 10), wraplength=300)
-result_label.pack(pady=10)
+    root = tk.Tk()
 
-best_time_label = tk.Label(root, text="Mejor tiempo: No hay récord aún", font=("Arial", 10))
-best_time_label.pack(pady=10)
+    root.title(f"{t['title']}")
+    button = tk.Button(root, text=t["generate_algorithm"], command=show_algorithm)
+    button.pack(pady=10)
+    # Etiqueta para mostrar el cronómetro
+    label = tk.Label(root, text=f"{t['press_space']}", font=("Arial", 12))
+    label.pack(pady=20)
 
-average_time_label = tk.Label(root, text="Tiempo promedio: --", font=("Arial", 10))
-average_time_label.pack(pady=10)
+    # Campo de entrada para el tamaño del cubo
+    entry_label = tk.Label(root, text=f"{t['cube_size']}", font=("Arial", 10))
+    entry_label.pack(pady=10)
+    cube_entry = tk.Entry(root)
+    cube_entry.pack(pady=5)
+    # Etiqueta para mostrar el algoritmo generado
+    result_label = tk.Label(root, text="", font=("Arial", 10), wraplength=300)
+    result_label.pack(pady=10)
+    best_time_label = tk.Label(root, text=f"{t['best_time']}: {t['no_record']}", font=("Arial", 10))
+    best_time_label.pack(pady=10)
+    average_time_label = tk.Label(root, text=f"{t['average_time']}: --", font=("Arial", 10))
+    average_time_label.pack(pady=10)
+    times_label = tk.Label(root, text=f"{t['recorded_times']}: []", font=("Arial", 10))
+    times_label.pack(pady=10)
 
-times_label = tk.Label(root, text="Tiempos registrados: []", font=("Arial", 10))
-times_label.pack(pady=10)
-
-# Vincular eventos de teclado a toda la aplicación
-root.bind_all("<KeyPress>", on_key_press)
-
-def main():
-    global label, cube_entry, result_label, best_time_label, average_time_label, times_label
-    # Iniciar el bucle principal de la aplicación
+    # Vincular eventos de teclado a toda la aplicación
+    root.bind_all("<KeyPress>", on_key_press)
     root.mainloop()
 
 if __name__ == "__main__":
-    root.mainloop()
+    main()

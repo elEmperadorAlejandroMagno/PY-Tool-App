@@ -139,6 +139,10 @@ class TimerApp:
     def run(self):
         self.root.mainloop()
 
+def main(lang):
+    app = TimerApp(lang)
+    app.run()
+
 if __name__ == "__main__":
     app = TimerApp(lang="en")
     app.run()

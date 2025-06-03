@@ -80,7 +80,7 @@ class GameManager:
         overall_winner = "X" if self.won_games["X"] > self.won_games["O"] else "O"
         print(f"{self.t['player']} {overall_winner} {self.t['wins_best_of']} {self.num_games} {self.t['games']}!")
 
-def main(lang="en"):
+def obtener_traducciones_tictactoe(lang):
     t = translations.get(lang, translations["en"])["tictactoe"]
     # Textos adicionales para mensajes
     t.setdefault("player", t.get("player1", "Player"))
@@ -93,7 +93,10 @@ def main(lang="en"):
     t.setdefault("best_of", "Best of:")
     t.setdefault("games", "games")
     t.setdefault("wins_best_of", "wins best of")
+    return t
 
+def main(lang):
+    t = obtener_traducciones_tictactoe(lang)
     try:
         num_games = int(input(f"{t['best_of']} N: "))
     except ValueError:

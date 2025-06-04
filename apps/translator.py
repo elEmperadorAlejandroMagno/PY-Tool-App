@@ -1,5 +1,6 @@
 from googletrans import Translator
 from translations.translations import get_translations as translations
+import os
 
 class TranslatorApp:
     def __init__(self, lang="en"):
@@ -8,7 +9,6 @@ class TranslatorApp:
         self.translator = Translator()
 
     def _translate_text(self, text):
-        # Siempre detecta el idioma de origen y traduce al español
         try:
             detected_lang = self.translator.detect(text).lang
             if detected_lang == "es":
@@ -23,11 +23,10 @@ class TranslatorApp:
 
     def translate_file(self, file_path):
         try:
-            print("Translating file, wait a moment...")
             with open(file_path, 'r', encoding='utf-8') as file:
                 lines = file.readlines()
         except FileNotFoundError:
-            return f"Error: file not found {file_path}"
+            return f"Error: file not found {os.path.basename(file_path)}"
         
         output_path = file_path.replace('.txt', '_translated.txt')
         try:
@@ -37,21 +36,12 @@ class TranslatorApp:
                     out_file.write(translated_line + '\n')
         except Exception:
             return f"Error writing to file"
-        return f"{self.t['output_path']}: {output_path}"
-
-# Funciones auxiliares separadas para la interacción con el usuario
+        return f"{self.t['output_path']}: {os.path.basename(output_path)}"
 
 def main(lang="en"):
-    app = TranslatorApp(lang)
-    tipo = input("¿Traducir una línea (1) o un archivo (2)?: ")
-    if tipo == "1":
-        text = input("Introduce el texto: ")
-        print("Traducción:", app.translate_line(text))
-    elif tipo == "2":
-        file_path = input("Introduce el path del archivo: ")
-        print(app.translate_file(file_path))
-    else:
-        print("Opción no válida.")
+    from apps.translator_gui import TranslatorGUI
+    gui = TranslatorGUI(lang)
+    gui.run()
 
 if __name__ == '__main__':
     main()

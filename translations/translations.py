@@ -30,6 +30,8 @@ get_translations = {
             "player2": "Player 2",
             "turn": "Turn",
             "winner": "Winner",
+            "reset_scores": "Reset scores",
+            "reset_board": "Reset board",
         }
     },
     "es": {
@@ -63,6 +65,8 @@ get_translations = {
             "player2": "Jugador 2",
             "turn": "Turno",
             "winner": "Ganador",
+            "reset_scores": "Reiniciar puntuaciones",
+            "reset_board": "Reiniciar tablero",
         }
     },
     "fr": {
@@ -96,6 +100,8 @@ get_translations = {
             "player2": "Joueur 2",
             "turn": "Tour",
             "winner": "Gagnant",
+            "reset_scores": "Réinitialiser les scores",
+            "reset_board": "Réinitialiser le plateau",
         }
     },
     "ru": {
@@ -129,6 +135,8 @@ get_translations = {
             "player2": "Игрок 2",
             "turn": "Ход",
             "winner": "Победитель",
+            "reset_scores": "Сбросить счет",
+            "reset_board": "Сбросить поле",
         }
     },
     "zh": {
@@ -162,6 +170,8 @@ get_translations = {
             "player2": "玩家2",
             "turn": "轮到",
             "winner": "获胜者",
+            "reset_scores": "重置分数",
+            "reset_board": "重置棋盘",
         }
     }
 }

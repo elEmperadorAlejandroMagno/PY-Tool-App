@@ -30,7 +30,7 @@ class TicTacToeGUI:
                 btn.grid(row=i, column=j)
                 self.buttons[i][j] = btn
 
-        self.reset_board_button = tk.Button(self.root, text=self.t.get("reset", "Reiniciar tablero"), command=self.reset_board)
+        self.reset_board_button = tk.Button(self.root, text=self.t.get("reset_board", "Reiniciar tablero"), command=self.reset_board)
         self.reset_board_button.pack(pady=10)
 
     def get_score_text(self):

@@ -39,7 +39,7 @@ class TranslatorApp:
         return f"{self.t['output_path']}: {os.path.basename(output_path)}"
 
 def main(lang="en"):
-    from apps.translator_gui import TranslatorGUI
+    from apps.guis.translator_gui import TranslatorGUI
     gui = TranslatorGUI(lang)
     gui.run()
 

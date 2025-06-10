@@ -42,29 +42,62 @@ class CubeScrambler:
 
 class TimerLogic:
     def __init__(self):
-        self._times_list = []
+        self._id_counter = 0
+        self._times_dict = {}
+        self._average_time = None
+        self._best_time = None
+        self._worst_time = None
 
-    def add_time(self, elapsed):
+    def add_time(self, elapsed, algorithm):
         if elapsed < 0:
             raise ValueError("El tiempo no puede ser negativo.")
-        self._times_list.append(elapsed)
+        self._id_counter += 1
+        self._times_dict[self._id_counter] = {"id": self._id_counter, "time": elapsed, "algorithm": algorithm}
+
+    def delete_time(self, time_id):
+        try:
+            self._times_dict.pop(time_id, None)
+        except KeyError:
+            raise ValueError(f"Tiempo con ID {time_id} no encontrado.")
+
+    @property
+    def id_counter(self):
+        return self._id_counter
 
     @property
     def best_time(self):
-        return min(self._times_list) if self._times_list else None
+        return min(self._times_dict.values(), key=lambda x: x["time"])["time"] if self._times_dict.values() else None
+    
+    @best_time.setter
+    def best_time(self, value):
+        if value < 0:
+            raise ValueError("El mejor tiempo no puede ser negativo.")
+        self._best_time = value
 
     @property
     def worst_time(self):
-        return max(self._times_list) if self._times_list else None
+        return max(self._times_dict.values(), key=lambda x: x["time"])["time"] if self._times_dict.values() else None
+    
+    @worst_time.setter
+    def worst_time(self, value):
+        if value < 0:
+            raise ValueError("El peor tiempo no puede ser negativo.")
+        self._worst_time = value
 
     @property
     def average_time(self):
-        return sum(self._times_list) / len(self._times_list) if self._times_list else None
+        return sum(x["time"] for x in self._times_dict.values()) / len(self._times_dict.values()) if self._times_dict.values() else None
+    
+    @average_time.setter
+    def average_time(self, value):
+        if value < 0:
+            raise ValueError("El tiempo promedio no puede ser negativo.")
+        self._average_time = value
 
     @property
-    def times_list(self):
-        return self._times_list.copy()
-
+    def times_dict(self):
+        return self._times_dict.values()
+    
 def main(lang="en"):
     from apps.guis.timer_gui import TimerAppGUI
     app = TimerAppGUI(lang)

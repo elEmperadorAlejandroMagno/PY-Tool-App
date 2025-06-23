@@ -31,8 +31,27 @@ class TranslatorGUI:
         self.result_label = tk.Label(self.root, text=self.t["translation"])
         self.result_label.pack(pady=10)
 
-        self.btn_file = tk.Button(self.root, text="Seleccionar archivo", command=self.translate_file)
+        self.file_path = None
+        self.btn_file = tk.Button(self.root, text="Seleccionar archivo", command=self.get_file_path)
         self.btn_file.pack(pady=5)
+
+        self.btn_translate_file = tk.Button(self.root, text="translate", command=self.translate_file, state=tk.DISABLED)
+        self.btn_translate_file.pack(pady=5)
+
+    def get_file_path(self):
+        self.file_path = filedialog.askopenfilename(
+            title="Selecciona un archivo de texto",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
+        )
+        if self.file_path != None:
+            self.enable_file_button()
+            self.btn_file.config(text=self.file_path.split("/")[-1])
+        else:
+            messagebox.showwarning("No file selected", "Please select a file to translate.")
+
+    def enable_file_button(self):
+        self.btn_translate_file.config(state=tk.NORMAL)
+        self.btn_file.config(state=tk.DISABLED)
 
     def translate_text(self):
         text = self.entry.get()
@@ -40,13 +59,8 @@ class TranslatorGUI:
         self.result_label.config(text=result)
 
     def translate_file(self):
-        file_path = filedialog.askopenfilename(
-            title="Selecciona un archivo de texto",
-            filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
-        )
-        if file_path:
-            result = self.app.translate_file(file_path)
-            messagebox.showinfo(self.t["translation"], result)
+        result = self.app.translate_file(self.file_path)
+        messagebox.showinfo(self.t["translation"], result)
 
     def set_entry_language(self, lang):
         self.app.entry_language = lang

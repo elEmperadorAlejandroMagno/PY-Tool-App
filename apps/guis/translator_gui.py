@@ -13,11 +13,20 @@ class TranslatorGUI:
         # Entrada de texto
         self.label = tk.Label(self.root, text=self.t["insert_text"])
         self.label.pack(pady=5)
+
+        self.entry_lang_options = ["detect", "ES", "EN", "RU"]
+        self.entry_lang = tk.OptionMenu(self.root, tk.StringVar(value="detect"), *self.entry_lang_options, command=self.set_entry_language)
+        self.entry_lang.pack(pady=5)
+
         self.entry = tk.Entry(self.root, width=50)
         self.entry.pack(pady=5)
 
         self.btn_translate = tk.Button(self.root, text=self.t["translate"], command=self.translate_text)
         self.btn_translate.pack(pady=5)
+
+        self.output_lang_options = ["ES", "EN", "RU"]
+        self.outro_lang = tk.OptionMenu(self.root, tk.StringVar(value=lang), *self.output_lang_options, command=self.set_output_language)
+        self.outro_lang.pack(pady=5)
 
         self.result_label = tk.Label(self.root, text=self.t["translation"])
         self.result_label.pack(pady=10)
@@ -38,6 +47,12 @@ class TranslatorGUI:
         if file_path:
             result = self.app.translate_file(file_path)
             messagebox.showinfo(self.t["translation"], result)
+
+    def set_entry_language(self, lang):
+        self.app.entry_language = lang
+
+    def set_output_language(self, lang):
+        self.app.output_language = lang
 
     def run(self):
         self.root.mainloop()

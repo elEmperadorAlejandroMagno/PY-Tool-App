@@ -1,4 +1,5 @@
 from googletrans import Translator
+from apps.help.read_files import read_pdf_file, read_docx_file, read_txt_file
 from translations.translations import get_translations as translations
 import os
 
@@ -28,16 +29,22 @@ class TranslatorApp:
         return self._translate_text(text)
 
     def translate_file(self, file_path):
-        try:
-            with open(file_path, 'r', encoding='utf-8') as file:
-                lines = file.readlines()
-        except FileNotFoundError:
-            return f"Error: file not found {os.path.basename(file_path)}"
-
-        output_path = file_path.replace('.txt', '_translated.txt')
+        text = []
+        output_path = ""
+        if file_path.endswith('.pdf'):
+            text = self.read_pdf_file(file_path)
+            output_path = file_path.replace('.pdf', '_translated.txt')
+        elif file_path.endswith('.docx'):
+            text = self.read_docx_file(file_path)
+            output_path = file_path.replace('.docx', '_translated.txt')
+        elif file_path.endswith('.txt'):
+            text = self.read_txt_file(file_path)
+            output_path = file_path.replace('.txt', '_translated.txt')
+        else:
+            return "Unsupported file format. Please use .pdf, .docx, or .txt files."
         try:
             with open(output_path, 'w', encoding='utf-8') as out_file:
-                for line in lines:
+                for line in text:
                     translated_line = self.translate_line(line.strip())
                     out_file.write(translated_line + '\n')
         except Exception:

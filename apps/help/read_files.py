@@ -2,14 +2,13 @@ import pdfplumber as PDF
 import docx
 import os
 
-def read_pdf_file(self, file_path):
+def read_pdf_file(file_path):
         text = []
         try:
             with PDF.open(file_path) as pdf:
                 for page in pdf.pages:
                     page_text = page.extract_text()
                     if page_text:
-                        # Puedes dividir por saltos dobles o dejar como un solo bloque
                         paragraphs = page_text.split('\n')
                         for para in paragraphs:
                             para = para.strip()
@@ -20,7 +19,7 @@ def read_pdf_file(self, file_path):
         return text
 
 
-def read_docx_file(self, file_path):
+def read_docx_file(file_path):
         text = []
         try:
             doc = docx.Document(file_path)
@@ -29,7 +28,7 @@ def read_docx_file(self, file_path):
             return f"Error: unable to read file {file_path}"
         return text
 
-def read_txt_file(self, file_path):
+def read_txt_file(file_path):
         text = []
         try:
             with open(file_path, 'r', encoding='utf-8') as file:

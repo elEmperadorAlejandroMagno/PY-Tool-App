@@ -9,34 +9,37 @@ class TranslatorGUI:
 
         self.root = tk.Tk()
         self.root.title(self.t["title"])
+        
+        self.translate_text= tk.Button(self.root, text=self.t["translate"], command=self.translate_text)
+        self.translate_text.pack(pady=10)
+        
+        self.translate_file = tk.Button(self.root, text=self.t["translate_file"], command=self.translate_file)
+        self.translate_file.pack(pady=10)
 
-        # Entrada de texto
-        self.label = tk.Label(self.root, text=self.t["insert_text"])
-        self.label.pack(pady=5)
-
-        self.entry_lang_options = ["detect", "ES", "EN", "RU"]
-        self.entry_lang = tk.OptionMenu(self.root, tk.StringVar(value="detect"), *self.entry_lang_options, command=self.set_entry_language)
-        self.entry_lang.pack(pady=5)
-
+    def translate_text_gui(self):
         self.entry = tk.Entry(self.root, width=50)
-        self.entry.pack(pady=5)
-
-        self.btn_translate = tk.Button(self.root, text=self.t["translate"], command=self.translate_text)
-        self.btn_translate.pack(pady=5)
-
-        self.output_lang_options = ["ES", "EN", "RU"]
-        self.outro_lang = tk.OptionMenu(self.root, tk.StringVar(value=lang), *self.output_lang_options, command=self.set_output_language)
-        self.outro_lang.pack(pady=5)
-
-        self.result_label = tk.Label(self.root, text=self.t["translation"])
+        self.entry.pack(pady=10)
+        
+        self.result_label = tk.Label(self.root, text="")
         self.result_label.pack(pady=10)
 
-        self.file_path = None
-        self.btn_file = tk.Button(self.root, text="Seleccionar archivo", command=self.get_file_path)
-        self.btn_file.pack(pady=5)
+        self.btn_translate = tk.Button(self.root, text=self.t["translate"], command=self.translate_text)
+        self.btn_translate.pack(pady=10)
 
-        self.btn_translate_file = tk.Button(self.root, text="translate", command=self.translate_file)
-        self.btn_translate_file.pack(pady=5)
+        self.btn_file = tk.Button(self.root, text=self.t["select_file"], command=self.get_file_path)
+        self.btn_file.pack(pady=10)
+
+        self.file_path = None
+        self.btn_translate_file = tk.Button(self.root, text=self.t["translate_file"], state=tk.DISABLED, command=self.translate_file)
+        self.btn_translate_file.pack(pady=10)
+
+    def file_translate_gui(self):
+        self.btn_file = tk.Button(self.root, text=self.t["select_file"], command=self.get_file_path)
+        self.btn_file.pack(pady=10)
+
+        self.file_path = None
+        self.btn_translate_file = tk.Button(self.root, text=self.t["translate_file"], state=tk.DISABLED, command=self.translate_file)
+        self.btn_translate_file.pack(pady=10)
 
     def get_file_path(self):
         self.file_path = filedialog.askopenfilename(

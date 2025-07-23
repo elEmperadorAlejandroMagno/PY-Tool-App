@@ -1,5 +1,5 @@
-from helpers.file_reader import read_pdf_file, read_docx_file, read_txt_file
-from helpers.file_writer import write_pdf_file, write_docx_file, write_txt_file
+from help.write_files import read_pdf_file, read_docx_file, read_txt_file
+from help.read_files import write_pdf_file, write_docx_file, write_txt_file
 import os
 from apps.translator import TranslatorApp
 

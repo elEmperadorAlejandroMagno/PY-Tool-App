@@ -9,6 +9,15 @@ class TranslatorGUI:
 
         self.root = tk.Tk()
         self.root.title(self.t["title"])
+
+        self.language_var = tk.StringVar(value=self.app.lang)
+        self.language_menu = tk.OptionMenu(
+            self.root,
+            self.language_var,
+            *self.app.languages,
+            command=self.set_lang
+        )
+        self.language_menu.pack(pady=10)
         
         self.translate_text= tk.Button(self.root, text=self.t["translate"], command=self.translate_text)
         self.translate_text.pack(pady=10)

@@ -5,6 +5,7 @@ import os
 class TranslatorApp:
     def __init__(self, lang="en"):
         self.translator = Translator()
+        self.languages = ["es", "fr", "ru", "en", "zh"]
         self.lang = lang
         self.t = translations.get(lang, translations["en"])["translator"]
         self._entry_lang = "detect"

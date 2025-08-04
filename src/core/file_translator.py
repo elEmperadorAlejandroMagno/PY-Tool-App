@@ -2,7 +2,7 @@ from help.write_files import read_pdf_file, read_docx_file, read_txt_file
 from help.read_files import write_pdf_file, write_docx_file, write_txt_file
 import os
 from typing import Dict, List, Callable, Any
-from apps.translator import TranslatorApp
+from translator import TranslatorApp
 
 class FileTranslator(TranslatorApp):
     def __init__(self, lang: str = "en") -> None:

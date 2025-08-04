@@ -1,4 +1,4 @@
-from apps.translator import TranslatorApp
+from translator import TranslatorApp
 
 class TextTranslator(TranslatorApp):
     def translate_line(self, text):

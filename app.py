@@ -1,10 +1,12 @@
 import argparse
 import tkinter as tk
 import sys
-from src.config.translations import get_translations as translations
+from src.config.i18n import get_available_languages
 from src.gui.translator_gui import TranslatorGUI
 
-def show_usage():
+languages_available = get_available_languages()
+
+def show_usage() -> None:
     """Muestra el uso correcto del programa"""
     print("\n=== TRANSLATOR APP ===")
     print("Uso correcto:")
@@ -16,7 +18,7 @@ def show_usage():
     print("\nIdiomas disponibles: en, es, fr, ru, zh")
     print("======================\n")
 
-def create_argument_parser():
+def create_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Aplicación de Traducción - Translator App",
         epilog="Ejemplos:\n  python app.py              # Inglés por defecto\n  python app.py --lang es    # Español\n  python app.py --lang fr    # Francés",
@@ -26,40 +28,40 @@ def create_argument_parser():
         "--lang", 
         type=str, 
         default="en", 
-        choices=["en", "es", "fr", "ru", "zh"],
+        choices=[languages_available],
         help="Idioma de la interfaz (por defecto: en)"
     )
     return parser
 
-def validate_language(language):
-    if language not in translations:
+def validate_language(language: str) -> bool:
+    if language not in languages_available:
         print(f"❌ Error: Idioma '{language}' no disponible")
         show_usage()
         return False
     return True
 
-def start_application(language):
+def start_application(language: str) -> None:
     print(f"🚀 Iniciando traductor en idioma: {language}")
-    gui = TranslatorGUI(lang=language)
+    gui = TranslatorGUI(language)
     tk.mainloop()
 
-def handle_keyboard_interrupt():
+def handle_keyboard_interrupt() -> None:
     """Maneja la interrupción por teclado (Ctrl+C)"""
     print("\n👋 Aplicación cerrada por el usuario")
     sys.exit(0)
 
-def handle_application_error(error):
+def handle_application_error(error) -> None:
     """Maneja errores generales de la aplicación"""
     print(f"❌ Error al iniciar la aplicación: {error}")
     show_usage()
     sys.exit(1)
 
-def configure_arguments():
+def configure_arguments() -> argparse.Namespace:
     parser = create_argument_parser()
     args = parser.parse_args()
     return args
 
-def main():
+def main() -> None:
     """Función principal que orquesta la ejecución de la aplicación"""
     try:
         args = configure_arguments()

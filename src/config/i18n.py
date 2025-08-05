@@ -49,9 +49,8 @@ class TranslationManager:
         # Fallback to English
         if "en" in translations:
             return translations["en"]
-        
-        # Last resort: return the key
-        raise KeyError(f"Translation for '{language}' not found")
+        else:
+            raise ValueError("No translations available")
     
     def get_available_languages(self) -> List[str]:
         """Get list of available language codes."""
@@ -65,9 +64,9 @@ def get_translations() -> Dict[str, Any]:
     """Get all translations."""
     return _translation_manager.load_translations()
 
-def get_text(key: str, language: str) -> str:
+def get_text(language: str) -> str:
     """Get translated text."""
-    return _translation_manager.get_text(key, language)
+    return _translation_manager.get_text(language)
 
 def get_available_languages() -> List[str]:
     """Get available language codes."""

@@ -14,14 +14,13 @@ def show_usage() -> None:
     print("  python app.py --lang es       # Español")
     print("  python app.py --lang fr       # Francés")
     print("  python app.py --lang ru       # Ruso")
-    print("  python app.py --lang zh       # Chino")
-    print("\nIdiomas disponibles: en, es, fr, ru, zh")
+    print(f"\nIdiomas disponibles: {', '.join(languages_available)}")
     print("======================\n")
 
 def create_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Aplicación de Traducción - Translator App",
-        epilog="Ejemplos:\n  python app.py              # Inglés por defecto\n  python app.py --lang es    # Español\n  python app.py --lang fr    # Francés",
+        epilog="Ejemplos:\n  python app.py              # Inglés por defecto",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(

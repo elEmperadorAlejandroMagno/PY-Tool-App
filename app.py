@@ -27,7 +27,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
         "--lang", 
         type=str, 
         default="en", 
-        choices=[languages_available],
+        choices=languages_available,
         help="Idioma de la interfaz (por defecto: en)"
     )
     return parser

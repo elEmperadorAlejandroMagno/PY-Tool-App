@@ -78,7 +78,7 @@ class TranslatorGUI:
     def translate_text(self) -> None:
         self.disable_translate_btn(self.btn_translate)
         text: str = self.entry.get()
-        result: str = self.app._translate_text(text)
+        result: str = self.app.translate_text(text)
         self.result_label.config(text=result)
         self.enable_translate_btn(self.btn_translate)
 

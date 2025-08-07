@@ -1,6 +1,4 @@
 from src.config.i18n import get_text, get_available_languages
-from src.services.googletrans_services import translate_text_delegate
-from src.services.spacy_text_process import preprocess_text, postprocess_text
 from typing import List, Dict, Any, Optional, Union
 import os
 
@@ -12,24 +10,11 @@ class TranslatorApp:
         self._entry_lang: str = "detect"
         self._output_lang: str = lang
 
-    def _preprocess_text(self, text_object: object) -> str:
-        try:
-            return preprocess_text(text_object)
-        except Exception as e:
-            return f"Error: unable to preprocess text. Try again later. ({str(e)})"
-        
-    def _postprocess_text(self, original_text: object, processed_text) -> str:
-        try:
-            return postprocess_text(original_text, processed_text)
-        except Exception as e:
-            return f"Error: unable to postprocess text. Try again later. ({str(e)})"
+    def translate_text(self, text: str) -> str:
+        pass
 
-    def _translate_text(self, text: str) -> str:
-        try:
-            src_input = (text, self._entry_lang, self._output_lang)
-            return translate_text_delegate(src_input)
-        except Exception as e:
-            return f"Error: unable to translate text. Try again later. ({str(e)})"
+    def translate_file(self, file_path: str) -> str:
+        pass
 
     @property
     def entry_language(self) -> str:

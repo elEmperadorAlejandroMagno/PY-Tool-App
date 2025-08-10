@@ -25,7 +25,7 @@ source .venv/bin/activate
 ```
 El proyecto utiliza makefile para simplificar la instalación de dependecias y la ejecución del programa
 ```bash
-# Instalar dependencias
+# Instalar dependencias | Crea y ejecuta un entorno virtual si no lo hiciste previamente
 make install
 ```
 ```bash

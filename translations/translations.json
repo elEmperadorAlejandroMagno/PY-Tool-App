@@ -6,7 +6,9 @@
     "translate": "Translate",
     "translate_file": "Translate File",
     "select_file": "Select File",
-    "output_path": "Translated file saved at"
+    "output_path": "Translated file saved at",
+    "select_language_from": "Translate from",
+    "select_language_to": "Translate to"
   },
   "es": {
     "title": "Traductor",
@@ -15,7 +17,9 @@
     "translate": "Traducir",
     "translate_file": "Traducir Archivo",
     "select_file": "Seleccionar Archivo",
-    "output_path": "Archivo traducido guardado en"
+    "output_path": "Archivo traducido guardado en",
+    "select_language_from": "Traducir desde",
+    "select_language_to": "Traducir a"
   },
   "fr": {
     "title": "Traducteur",
@@ -24,7 +28,9 @@
     "translate": "Traduire",
     "translate_file": "Traduire le Fichier",
     "select_file": "Sélectionner un Fichier",
-    "output_path": "Fichier traduit enregistré à"
+    "output_path": "Fichier traduit enregistré à",
+    "select_language_from": "Traduire depuis",
+    "select_language_to": "Traduire en"
   },
   "ru": {
     "title": "Переводчик",
@@ -33,6 +39,8 @@
     "translate": "Перевести",
     "translate_file": "Перевести файл",
     "select_file": "Выбрать файл",
-    "output_path": "Переведённый файл сохранён в"
+    "output_path": "Переведённый файл сохранён в",
+    "select_language_from": "Перевести с",
+    "select_language_to": "Перевести на"
   }
 }

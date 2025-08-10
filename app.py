@@ -42,7 +42,7 @@ def validate_language(language: str) -> bool:
 def start_application(language: str) -> None:
     print(f"🚀 Iniciando traductor en idioma: {language}")
     gui = TranslatorGUI(language)
-    tk.mainloop()
+    gui.run()
 
 def handle_keyboard_interrupt() -> None:
     """Maneja la interrupción por teclado (Ctrl+C)"""

@@ -1,9 +1,10 @@
 import pdfplumber as PDF
 import docx
 import os
+from typing import List
 
-def read_pdf_file(file_path):
-        text = []
+def read_pdf_file(file_path: str) -> List[str]:
+        text: List[str] = []
         try:
             with PDF.open(file_path) as pdf:
                 for page in pdf.pages:
@@ -19,7 +20,7 @@ def read_pdf_file(file_path):
         return text
 
 
-def read_docx_file(file_path):
+def read_docx_file(file_path: str) -> List[str]:
         text = []
         try:
             doc = docx.Document(file_path)
@@ -28,7 +29,7 @@ def read_docx_file(file_path):
             return f"Error: unable to read file {file_path}"
         return text
 
-def read_txt_file(file_path):
+def read_txt_file(file_path: str) -> List[str]:
         text = []
         try:
             with open(file_path, 'r', encoding='utf-8') as file:

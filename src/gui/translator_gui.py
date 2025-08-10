@@ -1,25 +1,17 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from typing import Optional, Dict, Any
-from src.core.translator import TranslatorApp
+from src.core.factories.translator_factory import create_translator_app
 
 class TranslatorGUI:
     def __init__(self, lang: str = "en") -> None:
-        self.app: TranslatorApp = TranslatorApp(lang)
+        self.app = create_translator_app(lang)
         self.t: Dict[str, Any] = self.app.t
         self.file_path: Optional[str] = None
+        self.app.languages.append("detect")
 
         self.root: tk.Tk = tk.Tk()
         self.root.title(self.t["title"])
-
-        self.language_var: tk.StringVar = tk.StringVar(value=self.app.lang)
-        self.language_menu: tk.OptionMenu = tk.OptionMenu(
-            self.root,
-            self.language_var,
-            *self.app.languages,
-            command=lambda value: self.set_lang(str(value))
-        )
-        self.language_menu.pack(pady=10)
         
         self.translate_text_btn: tk.Button = tk.Button(self.root, text=self.t["translate"], command=self.translate_text_gui)
         self.translate_text_btn.pack(pady=10)
@@ -27,7 +19,40 @@ class TranslatorGUI:
         self.translate_file_btn: tk.Button = tk.Button(self.root, text=self.t["translate_file"], command=self.file_translate_gui)
         self.translate_file_btn.pack(pady=10)
 
+    def set_entry_language_menu(self) -> None:
+        self.entry_language_var: tk.StringVar = tk.StringVar(value="detect")
+        self.entry_language_menu: tk.OptionMenu = tk.OptionMenu(
+            self.root,
+            self.entry_language_var,
+            *self.app.languages,
+            command=lambda value: self.set_entry_language(str(value))
+        )
+        self.entry_language_menu.pack(pady=10)
+
+    def set_output_language_menu(self) -> None:
+        self.output_language_var: tk.StringVar = tk.StringVar(value=self.app.lang)
+        self.output_language_menu: tk.OptionMenu = tk.OptionMenu(
+            self.root,
+            self.output_language_var,
+            *self.app.languages,
+            command=lambda value: self.set_output_language(str(value))
+        )
+        self.output_language_menu.pack(pady=10)
+
+    def draw_language_menus(self) -> None:
+        self.entry_label = tk.Label(self.root, text=self.t["select_language_from"])
+        self.entry_label.pack()
+        self.set_entry_language_menu() 
+        self.output_label = tk.Label(self.root, text=self.t["select_language_to"])
+        self.output_label.pack()
+        self.set_output_language_menu()
+
     def translate_text_gui(self) -> None:
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        self.draw_language_menus()
+        
         self.entry = tk.Entry(self.root, width=50)
         self.entry.pack(pady=10)
         
@@ -37,14 +62,12 @@ class TranslatorGUI:
         self.btn_translate = tk.Button(self.root, text=self.t["translate"], command=self.translate_text)
         self.btn_translate.pack(pady=10)
 
-        self.btn_file = tk.Button(self.root, text=self.t["select_file"], command=self.get_file_path)
-        self.btn_file.pack(pady=10)
-
-        self.file_path = None
-        self.btn_translate_file = tk.Button(self.root, text=self.t["translate_file"], state=tk.DISABLED, command=self.translate_file)
-        self.btn_translate_file.pack(pady=10)
-
     def file_translate_gui(self) -> None:
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        self.draw_language_menus()
+
         self.btn_file = tk.Button(self.root, text=self.t["select_file"], command=self.get_file_path)
         self.btn_file.pack(pady=10)
 
@@ -54,8 +77,13 @@ class TranslatorGUI:
 
     def get_file_path(self) -> None:
         self.file_path = filedialog.askopenfilename(
-            title="Selecciona un archivo de texto",
-            filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
+            title="Selecciona un archivo",
+            filetypes=[
+                ("Text files", "*.txt"),
+                ("PDF files", "*.pdf"),
+                ("Word files", "*.docx"),
+                ("All files", "*.*")
+            ]
         )
         if self.file_path:
             self.enable_file_button()
@@ -84,8 +112,14 @@ class TranslatorGUI:
 
     def translate_file(self) -> None:
         self.disable_translate_btn(self.btn_translate_file)
-        # TODO: Implementar traducción de archivos
-        result: str = "File translation not implemented yet"
+        if not self.file_path:
+            messagebox.showwarning("No file selected", "Please select a file to translate.")
+            self.enable_translate_btn(self.btn_translate_file)
+            return
+        try:
+            result: str = self.app.translate_file(self.file_path)
+        except Exception as e:
+            result = f"Error translating file: {e}"
         self.enable_translate_btn(self.btn_translate_file)
         messagebox.showinfo(self.t["translation"], result)
 

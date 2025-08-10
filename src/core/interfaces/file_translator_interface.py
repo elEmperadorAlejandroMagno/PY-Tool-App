@@ -1,29 +1,19 @@
+from abc import ABC, abstractmethod
+from typing import Callable, Dict
 import os
-from typing import Dict, List, Callable, Any
-from translator import TranslatorApp
 
-class FileTranslator(TranslatorApp):
-    def __init__(self, _entry_lang, _output_lang) -> None:
-        super().__init__(from_lang=_entry_lang, to_lang=_output_lang)
-        self.suffixes_enable: Dict[str, Callable[[str], str]] = {
-            '.pdf': self.translate_pdf_file,
-            '.docx': self.translate_docx_file,
-            '.txt': self.translate_txt_file,
-            # Add more file types as needed
-        }
-        self._file_path: str = ""
+class FileTranslatorInterface(ABC):
+    def __init__(self) -> None:
+        # map of file suffix to handler function
+        self.suffixes_enable: Dict[str, Callable[..., str]] = {}
 
-    def translate_file(self, _file_path) -> str:
-        pass
+    @abstractmethod
+    def translate_file(self, file_path: str, entry_lang: str, output_lang: str) -> str:
+        """Translate a file located at file_path using specified languages."""
+        raise NotImplementedError
 
-    @property
-    def file_path(self) -> str:
-        return self._file_path
-    
-    @file_path.setter
-    def file_path(self, path: str) -> None:
-        if os.path.isfile(path):
-            self._file_path = path
-        else:
+    @staticmethod
+    def validate_path(path: str) -> None:
+        if not os.path.isfile(path):
             raise ValueError("Invalid file path provided.")
 

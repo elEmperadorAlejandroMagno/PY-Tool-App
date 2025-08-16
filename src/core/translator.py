@@ -1,13 +1,13 @@
 from src.config.i18n import get_text, get_available_languages
-from typing import List, Dict, Any
+from typing import Any
 from src.core.interfaces.text_translator_interface import TextTranslatorInterface
 from src.core.interfaces.file_translator_interface import FileTranslatorInterface
 
 class TranslatorApp:
     def __init__(self, lang: str, text_translator: TextTranslatorInterface, file_translator: FileTranslatorInterface) -> None:
-        self.languages: List[str] = get_available_languages()
+        self.languages: list[str] = get_available_languages()
         self.lang: str = lang
-        self.t: Dict[str, Any] = get_text(self.lang)
+        self.t: dict[str, Any] = get_text(self.lang)
         self._entry_lang: str = "detect"
         self._output_lang: str = lang
         # dependencies (interfaces)

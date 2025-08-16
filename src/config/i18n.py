@@ -4,7 +4,7 @@ Simplified internationalization (i18n) system for the translator app.
 
 import json
 import os
-from typing import Dict, Any, List
+from typing import Any
 from pathlib import Path
 
 class TranslationManager:
@@ -17,7 +17,7 @@ class TranslationManager:
         self.translations_file = str(project_root / "translations" / "translations.json")
         self._cache = None
     
-    def load_translations(self) -> Dict[str, Any]:
+    def load_translations(self) -> dict[str, dict[str, Any]]:
         """Load translations from JSON file with caching."""
         if self._cache is None:
             try:
@@ -38,9 +38,9 @@ class TranslationManager:
                 }
         return self._cache
     
-    def get_text(self, language: str) -> str:
+    def get_text(self, language: str) -> dict[str, Any]:
         """Get translated text for a key and language."""
-        translations = self.load_translations()
+        translations: dict[str, dict[str, Any]] = self.load_translations()
         
         # Try target language first
         if language in translations:
@@ -52,7 +52,7 @@ class TranslationManager:
         else:
             raise ValueError("No translations available")
     
-    def get_available_languages(self) -> List[str]:
+    def get_available_languages(self) -> list[str]:
         """Get list of available language codes."""
         return list(self.load_translations().keys())
 
@@ -60,14 +60,14 @@ class TranslationManager:
 _translation_manager = TranslationManager()
 
 # Simple functions for easy use
-def get_translations() -> Dict[str, Any]:
+def get_translations() -> dict[str, dict[str, Any]]:
     """Get all translations."""
     return _translation_manager.load_translations()
 
-def get_text(language: str) -> str:
+def get_text(language: str) -> dict[str, Any]:
     """Get translated text."""
     return _translation_manager.get_text(language)
 
-def get_available_languages() -> List[str]:
+def get_available_languages() -> list[str]:
     """Get available language codes."""
     return _translation_manager.get_available_languages()

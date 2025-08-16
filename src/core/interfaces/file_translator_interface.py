@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Dict
+from collections.abc import Callable
 import os
 
 class FileTranslatorInterface(ABC):
     def __init__(self) -> None:
         # map of file suffix to handler function
-        self.suffixes_enable: Dict[str, Callable[..., str]] = {}
+        self.suffixes_enable: dict[str, Callable[..., str]] = {}
 
     @abstractmethod
     def translate_file(self, file_path: str, entry_lang: str, output_lang: str) -> str:

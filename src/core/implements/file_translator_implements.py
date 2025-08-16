@@ -1,4 +1,4 @@
-from typing import List, Callable
+from collections.abc import Callable
 import os
 from src.core.interfaces.file_translator_interface import FileTranslatorInterface
 from src.core.help.read_files import read_pdf_file, read_docx_file, read_txt_file
@@ -24,22 +24,22 @@ class FileTranslatorImplements(FileTranslatorInterface):
             return "Unsupported file format. Please use .pdf, .docx, or .txt files."
 
     def translate_pdf_file(self, file_path: str, entry_lang: str, output_lang: str) -> str:
-        text: List[str] = read_pdf_file(file_path)
-        translated: List[str] = [translate_text_delegate((line.strip(), entry_lang, output_lang)) for line in text if line.strip()]
+        text: list[str] = read_pdf_file(file_path)
+        translated: list[str] = [translate_text_delegate((line.strip(), entry_lang, output_lang)) for line in text if line.strip()]
         output_path: str = file_path.replace('.pdf', '_translated.pdf')
         write_pdf_file(translated, output_path)
         return f"File translated successfully and saved as {output_path.split('/')[-1]}"
 
     def translate_docx_file(self, file_path: str, entry_lang: str, output_lang: str) -> str:
-        text: List[str] = read_docx_file(file_path)
-        translated: List[str] = [translate_text_delegate((line.strip(), entry_lang, output_lang)) for line in text if line.strip()]
+        text: list[str] = read_docx_file(file_path)
+        translated: list[str] = [translate_text_delegate((line.strip(), entry_lang, output_lang)) for line in text if line.strip()]
         output_path: str = file_path.replace('.docx', '_translated.docx')
         write_docx_file(translated, output_path)
         return f"File translated successfully and saved as {output_path.split('/')[-1]}"
 
     def translate_txt_file(self, file_path: str, entry_lang: str, output_lang: str) -> str:
-        text: List[str] = read_txt_file(file_path)
-        translated: List[str] = [translate_text_delegate((line.strip(), entry_lang, output_lang)) for line in text if line.strip()]
+        text: list[str] = read_txt_file(file_path)
+        translated: list[str] = [translate_text_delegate((line.strip(), entry_lang, output_lang)) for line in text if line.strip()]
         output_path: str = file_path.replace('.txt', '_translated.txt')
         write_txt_file(translated, output_path)
         return f"File translated successfully and saved as {output_path.split('/')[-1]}"

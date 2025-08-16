@@ -1,13 +1,13 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from typing import Optional, Dict, Any
+from typing import Any
 from src.core.factories.translator_factory import create_translator_app
 
 class TranslatorGUI:
     def __init__(self, lang: str = "en") -> None:
         self.app = create_translator_app(lang)
-        self.t: Dict[str, Any] = self.app.t
-        self.file_path: Optional[str] = None
+        self.t: dict[str, Any] = self.app.t
+        self.file_path: str | None = None
         self.app.languages.append("detect")
 
         self.root: tk.Tk = tk.Tk()

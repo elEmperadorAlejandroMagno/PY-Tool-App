@@ -1,10 +1,11 @@
 import argparse
 import tkinter as tk
 import sys
+from typing import List
 from src.config.i18n import get_available_languages
 from src.gui.translator_gui import TranslatorGUI
 
-languages_available = get_available_languages()
+languages_available: List[str] = get_available_languages()
 
 def show_usage() -> None:
     """Muestra el uso correcto del programa"""

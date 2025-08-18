@@ -1,8 +1,12 @@
 import spacy 
-from typing import Dict, List
+from typing import TYPE_CHECKING
 
-def cargar_modelo(texto: str, language: str):
-    modelos: Dict[str] = {
+if TYPE_CHECKING:
+    from spacy.tokens import Doc
+
+
+def cargar_modelo(texto: str, language: str) -> "Doc":
+    modelos: dict[str, str] = {
         'en': 'en_core_web_lg',
         'es': 'es_core_news_lg',
         'it': 'it_core_news_lg',
@@ -16,7 +20,7 @@ def cargar_modelo(texto: str, language: str):
     else:
         raise ValueError("Idioma no soportado")
 
-def preprocess_text(text_object: object) -> str:
+def preprocess_text(text_object: "Doc") -> str:
     # procesa el texto para eliminar datos sensibles
     # por ejemplo, eliminando nombres propios o información personal
     new_text = text_object.text
@@ -31,7 +35,7 @@ def preprocess_text(text_object: object) -> str:
             new_text = new_text.replace(ent.text, 'LUGAR')
     return new_text
 
-def postprocess_text(original_text: object, processed_text: str) -> str:
+def postprocess_text(original_text: "Doc", processed_text: str) -> str:
     # restaura los datos sensibles en el texto
     # por ejemplo, restaurando nombres propios o información personal
     for ent in original_text.ents:

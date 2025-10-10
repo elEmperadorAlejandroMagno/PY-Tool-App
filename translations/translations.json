@@ -8,7 +8,14 @@
     "select_file": "Select File",
     "output_path": "Translated file saved at",
     "select_language_from": "Translate from",
-    "select_language_to": "Translate to"
+    "select_language_to": "Translate to",
+    "phonetic_transcription": "IPA Phonetic Transcription",
+    "transcribe_to_ipa": "Transcribe to IPA",
+    "phonetic_result": "Phonetic Transcription",
+    "accent_selection": "Accent",
+    "rp_accent": "Received Pronunciation (British)",
+    "insert_english_text": "Insert English text",
+    "transcription_note": "Note: Only English text is supported for IPA transcription"
   },
   "es": {
     "title": "Traductor",
@@ -19,7 +26,14 @@
     "select_file": "Seleccionar Archivo",
     "output_path": "Archivo traducido guardado en",
     "select_language_from": "Traducir desde",
-    "select_language_to": "Traducir a"
+    "select_language_to": "Traducir a",
+    "phonetic_transcription": "Transcripción Fonética IPA",
+    "transcribe_to_ipa": "Transcribir a IPA",
+    "phonetic_result": "Transcripción Fonética",
+    "accent_selection": "Acento",
+    "rp_accent": "Received Pronunciation (Británico)",
+    "insert_english_text": "Insertar texto en inglés",
+    "transcription_note": "Nota: Solo se admite texto en inglés para transcripción IPA"
   },
   "fr": {
     "title": "Traducteur",
@@ -30,7 +44,14 @@
     "select_file": "Sélectionner un Fichier",
     "output_path": "Fichier traduit enregistré à",
     "select_language_from": "Traduire depuis",
-    "select_language_to": "Traduire en"
+    "select_language_to": "Traduire en",
+    "phonetic_transcription": "Transcription Phonétique IPA",
+    "transcribe_to_ipa": "Transcrire en IPA",
+    "phonetic_result": "Transcription Phonétique",
+    "accent_selection": "Accent",
+    "rp_accent": "Received Pronunciation (Britannique)",
+    "insert_english_text": "Insérer le texte anglais",
+    "transcription_note": "Note: Seul le texte anglais est pris en charge pour la transcription IPA"
   },
   "ru": {
     "title": "Переводчик",
@@ -41,6 +62,13 @@
     "select_file": "Выбрать файл",
     "output_path": "Переведённый файл сохранён в",
     "select_language_from": "Перевести с",
-    "select_language_to": "Перевести на"
+    "select_language_to": "Перевести на",
+    "phonetic_transcription": "Фонетическая транскрипция IPA",
+    "transcribe_to_ipa": "Транскрибировать в IPA",
+    "phonetic_result": "Фонетическая транскрипция",
+    "accent_selection": "Акцент",
+    "rp_accent": "Received Pronunciation (британский)",
+    "insert_english_text": "Введите английский текст",
+    "transcription_note": "Примечание: Поддерживается только английский текст для транскрипции IPA"
   }
 }

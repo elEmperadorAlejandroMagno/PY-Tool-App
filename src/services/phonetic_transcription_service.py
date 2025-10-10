@@ -6,7 +6,7 @@ Especializado en Received Pronunciation (RP) - estándar británico.
 import eng_to_ipa as ipa_converter
 import re
 from typing import Dict, Optional
-from src.services.rp_phonetic_service import transcribe_text_to_rp_advanced
+from src.services.hybrid_rp_service import get_hybrid_rp_service
 
 def clean_text_for_transcription(text: str) -> str:
     """
@@ -44,8 +44,10 @@ def transcribe_text_to_ipa_rp(text: str) -> str:
         if not cleaned_text.strip():
             return ""
         
-        # Usar el servicio avanzado de RP
-        transcription = transcribe_text_to_rp_advanced(cleaned_text)
+        # Usar el servicio híbrido con prioridad en diccionario local
+        # Longman se puede habilitar como opción experimental
+        hybrid_service = get_hybrid_rp_service(use_longman=False)  # Por ahora, usar solo local
+        transcription = hybrid_service.transcribe_text(cleaned_text)
         
         return transcription
         

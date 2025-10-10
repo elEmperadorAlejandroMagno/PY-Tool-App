@@ -6,6 +6,7 @@ Especializado en Received Pronunciation (RP) - estándar británico.
 import eng_to_ipa as ipa_converter
 import re
 from typing import Dict, Optional
+from src.services.rp_phonetic_service import transcribe_text_to_rp_advanced
 
 def clean_text_for_transcription(text: str) -> str:
     """
@@ -43,12 +44,8 @@ def transcribe_text_to_ipa_rp(text: str) -> str:
         if not cleaned_text.strip():
             return ""
         
-        # Usar eng_to_ipa con configuración para RP
-        # La biblioteca eng_to_ipa usa principalmente RP por defecto
-        transcription = ipa_converter.convert(cleaned_text)
-        
-        # Post-procesamiento para mejorar la transcripción RP
-        transcription = improve_rp_transcription(transcription)
+        # Usar el servicio avanzado de RP
+        transcription = transcribe_text_to_rp_advanced(cleaned_text)
         
         return transcription
         
@@ -57,31 +54,101 @@ def transcribe_text_to_ipa_rp(text: str) -> str:
 
 def improve_rp_transcription(transcription: str) -> str:
     """
-    Mejora la transcripción IPA para que sea más consistente con RP.
+    Convierte transcripción IPA de General American a Received Pronunciation.
     
     Args:
-        transcription (str): Transcripción IPA básica
+        transcription (str): Transcripción IPA en General American
     
     Returns:
-        str: Transcripción IPA mejorada para RP
+        str: Transcripción IPA en RP (Received Pronunciation)
     """
-    # Diccionario de ajustes específicos para RP
-    rp_adjustments = {
-        # Ajustes comunes para RP vs General American
-        'ɑr': 'ɑː',  # car -> /kɑː/
-        'ɔr': 'ɔː',  # for -> /fɔː/
-        'ər': 'ə',   # better -> /ˈbetə/
-        'æ': 'æ',    # cat -> /kæt/ (mantener)
-        'ɑ': 'ɑː',   # father -> /ˈfɑːðə/
-        'ɔ': 'ɒ',    # got -> /ɡɒt/
+    # Mapeo completo de fonemas GA -> RP
+    ga_to_rp_mapping = {
+        # Vocales róticas (r-colored vowels) -> vocales largas sin r
+        'ɑr': 'ɑː',    # car /kɑr/ -> /kɑː/
+        'ɔr': 'ɔː',    # for /fɔr/ -> /fɔː/ 
+        'ər': 'ə',     # better /ˈbɛtər/ -> /ˈbetə/
+        'ɪr': 'ɪə',   # here /hɪr/ -> /hɪə/
+        'ɛr': 'eə',   # care /kɛr/ -> /keə/
+        'ʊr': 'ʊə',   # sure /ʃʊr/ -> /ʃʊə/
+        
+        # Vocal LOT (o corta)
+        'ɑ': 'ɒ',     # got /ɡɑt/ -> /ɡɒt/
+        
+        # Vocal CLOTH (también afectada)
+        'ɔ': 'ɒ',     # long /lɔŋ/ -> /lɒŋ/ (en algunos casos)
+        
+        # Diptongo GOAT 
+        'oʊ': 'əʊ',   # go /ɡoʊ/ -> /ɡəʊ/
+        
+        # Diptongo FACE
+        'eɪ': 'eɪ',   # same in both (mantener)
+        
+        # Vocal STRUT vs FOOT distinction
+        'ʌ': 'ʌ',     # but /bʌt/ -> /bʌt/ (igual en RP)
+        
+        # R no rótica - eliminar R final y pre-consonántica
+        'r': '',      # eliminar r no rótica
+        
+        # TRAP vowel (generalmente igual)
+        'æ': 'æ',     # cat /kæt/ -> /kæt/
+        
+        # Algunas palabras específicas que son diferentes
+        'ænt': 'ɑːnt', # can't, dance, etc. en RP usan /ɑː/
+        'æns': 'ɑːns', # dance /dæns/ -> /dɑːns/
+        'æsk': 'ɑːsk', # ask /æsk/ -> /ɑːsk/
+        'æf': 'ɑːf',   # after, laugh, etc.
+        'æθ': 'ɑːθ',   # path /pæθ/ -> /pɑːθ/
     }
     
-    # Aplicar ajustes
+    # Aplicar conversiones básicas
     improved = transcription
-    for american, british in rp_adjustments.items():
-        improved = improved.replace(american, british)
+    
+    # Aplicar mapeo en orden específico (más largo primero para evitar conflictos)
+    sorted_mappings = sorted(ga_to_rp_mapping.items(), key=lambda x: len(x[0]), reverse=True)
+    
+    for ga_sound, rp_sound in sorted_mappings:
+        improved = improved.replace(ga_sound, rp_sound)
+    
+    # Post-procesamiento específico para RP
+    improved = apply_rp_specific_rules(improved)
     
     return improved
+
+def apply_rp_specific_rules(transcription: str) -> str:
+    """
+    Aplica reglas específicas adicionales para RP.
+    
+    Args:
+        transcription (str): Transcripción parcialmente convertida
+    
+    Returns:
+        str: Transcripción con reglas RP aplicadas
+    """
+    import re
+    
+    # Eliminar R no róticas (r que no va seguida de vocal)
+    # R final de palabra
+    transcription = re.sub(r'r$', '', transcription)
+    # R antes de consonante
+    transcription = re.sub(r'r([bcdfghjklmnpqstvwxyz])', r'\1', transcription)
+    # R entre consonante y vocal se mantiene
+    
+    # Ajustar ciertas combinaciones específicas
+    specific_adjustments = {
+        'hɛˈloʊ': 'həˈləʊ',     # hello
+        'wəld': 'wɜːld',         # world (pero sin la r final)
+        'wɜːld': 'wɜːld',        # world corrected
+        'ˈstændəd': 'ˈstændəd',  # standard (mantener)
+    }
+    
+    for ga_form, rp_form in specific_adjustments.items():
+        transcription = transcription.replace(ga_form, rp_form)
+    
+    # Limpiar dobles espacios o símbolos extraños
+    transcription = re.sub(r'\s+', ' ', transcription.strip())
+    
+    return transcription
 
 def get_word_transcription(word: str) -> Optional[str]:
     """

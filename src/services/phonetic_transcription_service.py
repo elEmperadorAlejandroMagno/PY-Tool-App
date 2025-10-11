@@ -1,193 +1,143 @@
 """
-Servicio de transcripción fonética para convertir texto inglés a notación IPA.
-Especializado en Received Pronunciation (RP) - estándar británico.
+Servicio de utilidades para transcripción fonética.
+Incluye funciones de validación y verificación de texto para IPA.
 """
 
-import eng_to_ipa as ipa_converter
 import re
-from typing import Dict, Optional
-from src.services.hybrid_rp_service import get_hybrid_rp_service
+from typing import Optional
 
-def clean_text_for_transcription(text: str) -> str:
-    """
-    Limpia el texto antes de la transcripción fonética.
-    
-    Args:
-        text (str): Texto a limpiar
-    
-    Returns:
-        str: Texto limpio para transcripción
-    """
-    # Remover caracteres especiales excepto puntuación básica
-    text = re.sub(r'[^\w\s.,!?;:\'-]', '', text)
-    # Normalizar espacios
-    text = re.sub(r'\s+', ' ', text.strip())
-    return text
-
-def transcribe_text_to_ipa_rp(text: str) -> str:
-    """
-    Transcribe texto inglés a notación IPA usando Received Pronunciation.
-    
-    Args:
-        text (str): Texto en inglés para transcribir
-    
-    Returns:
-        str: Transcripción IPA del texto
-    
-    Raises:
-        Exception: Si hay error en la transcripción
-    """
-    try:
-        # Limpiar texto
-        cleaned_text = clean_text_for_transcription(text)
-        
-        if not cleaned_text.strip():
-            return ""
-        
-        # Usar el servicio híbrido con prioridad en diccionario local
-        # Longman se puede habilitar como opción experimental
-        hybrid_service = get_hybrid_rp_service(use_longman=False)  # Por ahora, usar solo local
-        transcription = hybrid_service.transcribe_text(cleaned_text)
-        
-        return transcription
-        
-    except Exception as e:
-        raise Exception(f"Error en transcripción fonética: {str(e)}")
-
-def improve_rp_transcription(transcription: str) -> str:
-    """
-    Convierte transcripción IPA de General American a Received Pronunciation.
-    
-    Args:
-        transcription (str): Transcripción IPA en General American
-    
-    Returns:
-        str: Transcripción IPA en RP (Received Pronunciation)
-    """
-    # Mapeo completo de fonemas GA -> RP
-    ga_to_rp_mapping = {
-        # Vocales róticas (r-colored vowels) -> vocales largas sin r
-        'ɑr': 'ɑː',    # car /kɑr/ -> /kɑː/
-        'ɔr': 'ɔː',    # for /fɔr/ -> /fɔː/ 
-        'ər': 'ə',     # better /ˈbɛtər/ -> /ˈbetə/
-        'ɪr': 'ɪə',   # here /hɪr/ -> /hɪə/
-        'ɛr': 'eə',   # care /kɛr/ -> /keə/
-        'ʊr': 'ʊə',   # sure /ʃʊr/ -> /ʃʊə/
-        
-        # Vocal LOT (o corta)
-        'ɑ': 'ɒ',     # got /ɡɑt/ -> /ɡɒt/
-        
-        # Vocal CLOTH (también afectada)
-        'ɔ': 'ɒ',     # long /lɔŋ/ -> /lɒŋ/ (en algunos casos)
-        
-        # Diptongo GOAT 
-        'oʊ': 'əʊ',   # go /ɡoʊ/ -> /ɡəʊ/
-        
-        # Diptongo FACE
-        'eɪ': 'eɪ',   # same in both (mantener)
-        
-        # Vocal STRUT vs FOOT distinction
-        'ʌ': 'ʌ',     # but /bʌt/ -> /bʌt/ (igual en RP)
-        
-        # R no rótica - eliminar R final y pre-consonántica
-        'r': '',      # eliminar r no rótica
-        
-        # TRAP vowel (generalmente igual)
-        'æ': 'æ',     # cat /kæt/ -> /kæt/
-        
-        # Algunas palabras específicas que son diferentes
-        'ænt': 'ɑːnt', # can't, dance, etc. en RP usan /ɑː/
-        'æns': 'ɑːns', # dance /dæns/ -> /dɑːns/
-        'æsk': 'ɑːsk', # ask /æsk/ -> /ɑːsk/
-        'æf': 'ɑːf',   # after, laugh, etc.
-        'æθ': 'ɑːθ',   # path /pæθ/ -> /pɑːθ/
-    }
-    
-    # Aplicar conversiones básicas
-    improved = transcription
-    
-    # Aplicar mapeo en orden específico (más largo primero para evitar conflictos)
-    sorted_mappings = sorted(ga_to_rp_mapping.items(), key=lambda x: len(x[0]), reverse=True)
-    
-    for ga_sound, rp_sound in sorted_mappings:
-        improved = improved.replace(ga_sound, rp_sound)
-    
-    # Post-procesamiento específico para RP
-    improved = apply_rp_specific_rules(improved)
-    
-    return improved
-
-def apply_rp_specific_rules(transcription: str) -> str:
-    """
-    Aplica reglas específicas adicionales para RP.
-    
-    Args:
-        transcription (str): Transcripción parcialmente convertida
-    
-    Returns:
-        str: Transcripción con reglas RP aplicadas
-    """
-    import re
-    
-    # Eliminar R no róticas (r que no va seguida de vocal)
-    # R final de palabra
-    transcription = re.sub(r'r$', '', transcription)
-    # R antes de consonante
-    transcription = re.sub(r'r([bcdfghjklmnpqstvwxyz])', r'\1', transcription)
-    # R entre consonante y vocal se mantiene
-    
-    # Ajustar ciertas combinaciones específicas
-    specific_adjustments = {
-        'hɛˈloʊ': 'həˈləʊ',     # hello
-        'wəld': 'wɜːld',         # world (pero sin la r final)
-        'wɜːld': 'wɜːld',        # world corrected
-        'ˈstændəd': 'ˈstændəd',  # standard (mantener)
-    }
-    
-    for ga_form, rp_form in specific_adjustments.items():
-        transcription = transcription.replace(ga_form, rp_form)
-    
-    # Limpiar dobles espacios o símbolos extraños
-    transcription = re.sub(r'\s+', ' ', transcription.strip())
-    
-    return transcription
-
-def get_word_transcription(word: str) -> Optional[str]:
-    """
-    Obtiene la transcripción IPA de una palabra específica.
-    
-    Args:
-        word (str): Palabra a transcribir
-    
-    Returns:
-        Optional[str]: Transcripción IPA de la palabra o None si hay error
-    """
-    try:
-        word = word.strip().lower()
-        if not word:
-            return None
-            
-        transcription = ipa_converter.convert(word)
-        return improve_rp_transcription(transcription)
-    except:
-        return None
 
 def is_valid_english_text(text: str) -> bool:
     """
-    Verifica si el texto contiene principalmente caracteres válidos para inglés.
+    Valida si el texto parece ser inglés apropiado para transcripción IPA.
+    Simplificada para aceptar cualquier texto no vacío.
     
     Args:
-        text (str): Texto a verificar
-    
+        text (str): Texto a validar
+        
     Returns:
-        bool: True si el texto parece ser inglés válido
+        bool: True si el texto no está vacío, False en caso contrario
     """
-    # Verificar que el texto contiene principalmente letras del alfabeto inglés
-    english_chars = re.findall(r'[a-zA-Z]', text)
-    total_chars = re.findall(r'[a-zA-ZÀ-ÿ]', text)  # Incluir caracteres con acentos
-    
-    if len(total_chars) == 0:
+    if not text or not isinstance(text, str):
         return False
     
-    # Al menos 80% de caracteres deben ser del alfabeto inglés básico
-    return len(english_chars) / len(total_chars) >= 0.8
+    text = text.strip()
+    if not text:
+        return False
+    
+    # Aceptar cualquier texto que tenga contenido
+    return True
+
+
+def clean_text_for_transcription(text: str) -> str:
+    """
+    Limpia el texto para prepararlo para transcripción fonética.
+    
+    Args:
+        text (str): Texto a limpiar
+        
+    Returns:
+        str: Texto limpio listo para transcripción
+    """
+    if not text:
+        return ""
+    
+    # Normalizar espacios
+    cleaned = re.sub(r'\s+', ' ', text.strip())
+    
+    # Remover caracteres no latinos excepto puntuación básica
+    cleaned = re.sub(r'[^\w\s.,!?\';:()\-\'"]+', '', cleaned)
+    
+    return cleaned
+
+
+def extract_words_from_text(text: str) -> list[str]:
+    """
+    Extrae palabras individuales del texto para transcripción.
+    
+    Args:
+        text (str): Texto del cual extraer palabras
+        
+    Returns:
+        list[str]: Lista de palabras extraídas
+    """
+    if not text:
+        return []
+    
+    # Extraer solo palabras (sin puntuación)
+    words = re.findall(r'\b[a-zA-Z]+\b', text.lower())
+    return words
+
+
+def is_likely_english_word(word: str) -> bool:
+    """
+    Determina si una palabra individual parece ser inglesa.
+    
+    Args:
+        word (str): Palabra a verificar
+        
+    Returns:
+        bool: True si la palabra parece ser inglesa
+    """
+    if not word or not isinstance(word, str):
+        return False
+    
+    word = word.strip().lower()
+    if not word:
+        return False
+    
+    # Verificar que contenga solo letras
+    if not re.match(r'^[a-z]+$', word):
+        return False
+    
+    # Lista extendida de palabras muy comunes en inglés
+    very_common_words = {
+        'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i', 'it', 
+        'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at', 'this', 
+        'but', 'his', 'by', 'from', 'they', 'she', 'or', 'an', 'will', 'my',
+        'one', 'all', 'would', 'there', 'their', 'we', 'him', 'her', 'has',
+        'had', 'which', 'oil', 'its', 'been', 'if', 'more', 'when', 'up',
+        'out', 'so', 'what', 'can', 'said', 'each', 'about', 'how', 'get',
+        'may', 'way', 'these', 'could', 'time', 'very', 'know', 'just',
+        'first', 'into', 'over', 'think', 'also', 'your', 'work', 'life',
+        'only', 'new', 'year', 'come', 'state', 'use', 'man', 'day', 'good',
+        'right', 'own', 'see', 'make', 'take', 'want', 'give', 'need', 'like'
+    }
+    
+    if word in very_common_words:
+        return True
+    
+    # Patrones típicos de palabras en inglés
+    english_patterns = [
+        r'^[a-z]{2,}$',      # Al menos 2 caracteres
+        r'.*ing$',           # Terminaciones en -ing
+        r'.*ed$',            # Terminaciones en -ed
+        r'.*ly$',            # Terminaciones en -ly
+        r'.*tion$',          # Terminaciones en -tion
+        r'.*able$',          # Terminaciones en -able
+        r'.*ful$',           # Terminaciones en -ful
+        r'.*less$',          # Terminaciones en -less
+        r'.*ness$',          # Terminaciones en -ness
+        r'^un.*',            # Prefijo un-
+        r'^re.*',            # Prefijo re-
+        r'^pre.*',           # Prefijo pre-
+        r'^dis.*',           # Prefijo dis-
+        r'^over.*',          # Prefijo over-
+        r'^under.*',         # Prefijo under-
+    ]
+    
+    # Verificar si la palabra coincide con algún patrón inglés
+    for pattern in english_patterns:
+        if re.match(pattern, word):
+            return True
+    
+    # Verificar combinaciones de letras comunes en inglés vs no comunes
+    # Letras muy comunes en inglés
+    common_letters = 'etaoinshrdlcumwfgypbvkjxqz'
+    
+    # Si la palabra es muy corta, ser más permisivo
+    if len(word) <= 3:
+        return True
+    
+    # Por defecto, aceptar la palabra si llega aquí
+    return True

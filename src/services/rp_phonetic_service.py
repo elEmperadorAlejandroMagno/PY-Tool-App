@@ -130,6 +130,82 @@ RP_WORD_DICTIONARY = {
     "speak": "spiːk",
     "listen": "ˈlɪsən",
     "understand": "ˌʌndəˈstænd",
+    
+    # Palabras comunes con /e/ (DRESS vowel)
+    "red": "red",
+    "bed": "bed",
+    "ten": "ten",
+    "pen": "pen",
+    "men": "men",
+    "when": "wen",
+    "then": "ðen",
+    "them": "ðem",
+    "get": "get",
+    "let": "let",
+    "met": "met",
+    "set": "set",
+    "net": "net",
+    "wet": "wet",
+    "yet": "jet",
+    "yes": "jes",
+    "help": "help",
+    "tell": "tel",
+    "well": "wel",
+    "sell": "sel",
+    "fell": "fel",
+    "bell": "bel",
+    "cell": "sel",
+    "left": "left",
+    "next": "nekst",
+    "best": "best",
+    "rest": "rest",
+    "west": "west",
+    "nest": "nest",
+    "chest": "tʃest",
+    "fresh": "freʃ",
+    "dress": "dres",
+    "press": "pres",
+    "less": "les",
+    "mess": "mes",
+    "guess": "ges",
+    "bless": "bles",
+    "stress": "stres",
+    "express": "ɪkˈspres",
+    "success": "səkˈses",
+    "progress": "ˈprəʊgres",  # noun form
+    "address": "əˈdres",
+    "access": "ˈækses",
+    "process": "ˈprəʊses",  # noun form
+    "possess": "pəˈzes",
+    "assess": "əˈses",
+    "unless": "ənˈles",
+    "express": "ɪkˈspres",
+    "impress": "ɪmˈpres",
+    "suppress": "səˈpres",
+    "depress": "dɪˈpres",
+    "compress": "kəmˈpres",
+    
+    # Palabras de poesía/literatura comunes
+    "roses": "ˈrəʊzez",
+    "violets": "ˈvaɪəlets",
+    "blue": "bluː",
+    "great": "greɪt",
+    "you": "juː",
+    
+    # Palabras adicionales comunes
+    "back": "bæk",
+    "our": "aʊə",
+    "weekly": "ˈwiːkli",
+    "time": "taɪm",
+    "now": "naʊ",
+    "today": "təˈdeɪ",
+    "by": "baɪ",
+    "young": "jʌŋ",
+    "blogger": "ˈblɒɡə",
+    "travel": "ˈtrævəl",
+    "good": "ɡʊd",
+    "hi": "haɪ",
+    "justin": "ˈdʒʌstɪn",
 }
 
 def get_rp_transcription_from_dict(word: str) -> Optional[str]:
@@ -194,7 +270,8 @@ def convert_ga_to_rp_advanced(transcription: str) -> str:
         (r't(?=i[ənəm])', 't'),     # mantener /t/ en -tion, -tive (no flapping)
         
         # Ajustes de vocales específicas
-        (r'ɛ(?=r)', 'e'),           # preparar para /eə/
+        (r'ɛ', 'e'),                # DRESS vowel: GA /ɛ/ -> RP /e/
+        (r'e(?=r)', 'e'),           # preparar para /eə/
         (r'ɪ(?=r)', 'ɪ'),           # preparar para /ɪə/
         
     ]

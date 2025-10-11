@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from typing import Optional, Dict, Any
 from src.core.factories.translator_factory import create_translator_app
+from src.core.implements.phonetic_transcription_implements import PhoneticTranscriptionImplements
 
 class TranslatorGUI:
     def __init__(self, lang: str = "en") -> None:
@@ -10,6 +11,9 @@ class TranslatorGUI:
         self.file_path: Optional[str] = None
         self.entry_languages = [lang for lang in self.app.languages] + ["detect"]
         self.output_languages = [lang for lang in self.app.languages]
+        
+        # Inicializar el servicio de transcripción fonética
+        self.phonetic_transcriptor = PhoneticTranscriptionImplements()
 
         self.root: tk.Tk = tk.Tk()
         self.root.title(self.t["title"])
@@ -26,16 +30,14 @@ class TranslatorGUI:
         self.file_tab = tk.Frame(self.notebook)
         self.notebook.add(self.file_tab, text=self.t["translate_file"])
         
-        # Frame para transcripción fonética IPA (solo si está disponible)
-        if self.app.is_phonetic_transcription_available():
-            self.phonetic_tab = tk.Frame(self.notebook)
-            self.notebook.add(self.phonetic_tab, text=self.t["phonetic_transcription"])
+        # Frame para herramientas
+        self.tools_tab = tk.Frame(self.notebook)
+        self.notebook.add(self.tools_tab, text="IPA Transcription")
 
         # Renderizar cada apartado
         self.render_text_tab()
         self.render_file_tab()
-        if self.app.is_phonetic_transcription_available():
-            self.render_phonetic_tab()
+        self.render_tools_tab()
 
     def render_text_tab(self):
         # frame interno con padding
@@ -109,67 +111,83 @@ class TranslatorGUI:
         self.btn_translate_file = tk.Button(content_frame, text=self.t["translate_file"], state=tk.DISABLED, command=self.translate_file)
         self.btn_translate_file.pack(pady=10)
     
-    def render_phonetic_tab(self):
-        """Renderiza la pestaña de transcripción fonética IPA"""
-        # frame interno con padding
-        content_frame = tk.Frame(self.phonetic_tab)
+    def render_tools_tab(self):
+        """Renderiza la pestaña de herramientas"""
+        # Frame principal con padding
+        content_frame = tk.Frame(self.tools_tab)
         content_frame.pack(fill="both", expand=True, padx=10, pady=10)
         
-        # Nota informativa
-        note_label = tk.Label(content_frame, text=self.t["transcription_note"], font=("Arial", 9), fg="gray")
-        note_label.pack(pady=(0, 10))
+        # Select/Dropdown para elegir tipo de IPA
+        tool_label = tk.Label(content_frame, text="Select IPA Type:")
+        tool_label.pack(pady=(0, 5))
         
-        # Selección de acento
-        accent_label = tk.Label(content_frame, text=self.t["accent_selection"])
-        accent_label.pack()
-        
-        self.accent_var = tk.StringVar(value="rp")
-        accents = self.app.get_supported_accents()
-        accent_options = []
-        
-        for accent in accents:
-            if accent == "rp":
-                accent_options.append(self.t["rp_accent"])
-        
-        if accent_options:
-            accent_menu = tk.OptionMenu(
-                content_frame,
-                self.accent_var,
-                *accent_options,
-                command=lambda value: self.set_accent_from_description(str(value))
-            )
-            accent_menu.pack(pady=5)
-            accent_menu.config(width=25)
-        
-        # Entrada de texto
-        text_label = tk.Label(content_frame, text=self.t["insert_english_text"])
-        text_label.pack(pady=(10, 0))
-        
-        self.phonetic_entry = tk.Text(content_frame, width=50, height=5)
-        self.phonetic_entry.pack(pady=10)
-        
-        # Botón de transcripción
-        self.btn_transcribe = tk.Button(
-            content_frame, 
-            text=self.t["transcribe_to_ipa"], 
-            command=self.transcribe_to_ipa
+        self.tool_var = tk.StringVar(value="RP IPA")
+        tool_options = ["RP IPA", "American IPA"]
+        tool_menu = tk.OptionMenu(
+            content_frame,
+            self.tool_var,
+            *tool_options,
+            command=lambda value: self.update_tool_selection(str(value))
         )
-        self.btn_transcribe.pack(pady=10)
+        tool_menu.pack(pady=5)
+        tool_menu.config(width=15)
         
-        # Área de resultado
-        result_label = tk.Label(content_frame, text=self.t["phonetic_result"] + ":")
-        result_label.pack(pady=(10, 5))
+        # Checkbox para formas strong/weak
+        self.use_weak_forms_var = tk.BooleanVar(value=True)  # Por defecto usa formas weak
+        weak_forms_checkbox = tk.Checkbutton(
+            content_frame,
+            text="Use weak forms (unstressed)",
+            variable=self.use_weak_forms_var,
+            font=("Arial", 9)
+        )
+        weak_forms_checkbox.pack(pady=(10, 0))
         
-        # Usar una fuente que soporte bien IPA
-        self.phonetic_result_text = tk.Text(
-            content_frame, 
-            width=50, 
-            height=4, 
-            font=("Arial Unicode MS", 12),  # Fuente que soporta IPA
+        # Input Text
+        input_label = tk.Label(content_frame, text="English Text:")
+        input_label.pack(pady=(15, 5))
+        
+        self.tools_input = tk.Text(content_frame, width=60, height=6)
+        self.tools_input.pack(pady=5)
+        
+        # Botón central (entre los inputs)
+        self.btn_process = tk.Button(
+            content_frame,
+            text="Transcribe",
+            command=self.process_text_tool,
+            bg="#4CAF50",
+            fg="white",
+            font=("Arial", 10, "bold")
+        )
+        self.btn_process.pack(pady=10)
+        
+        # Output Text
+        output_label = tk.Label(content_frame, text="IPA Transcription:")
+        output_label.pack(pady=(5, 5))
+        
+        self.tools_output = tk.Text(
+            content_frame,
+            width=60,
+            height=6,
             state=tk.DISABLED,
-            bg="#f0f0f0"
+            bg="#f0f0f0",
+            font=("Arial Unicode MS", 12)  # Fuente que soporta bien caracteres IPA
         )
-        self.phonetic_result_text.pack(pady=5)
+        self.tools_output.pack(pady=5)
+        
+        # Frame para el botón inferior en la esquina
+        bottom_frame = tk.Frame(content_frame)
+        bottom_frame.pack(fill="x", pady=(10, 0))
+        
+        # Botón en la esquina inferior derecha
+        self.btn_clear_all = tk.Button(
+            bottom_frame,
+            text="Clear All",
+            command=self.clear_all_tools,
+            bg="#f44336",
+            fg="white",
+            font=("Arial", 9)
+        )
+        self.btn_clear_all.pack(side="right")
 
     # Métodos para pestaña de texto
     def translate_text(self) -> None:
@@ -234,51 +252,75 @@ class TranslatorGUI:
     def set_output_language_file(self, lang: str) -> None:
         self.app.output_language = lang
     
-    # Métodos para transcripción fonética
-    def transcribe_to_ipa(self) -> None:
-        """Transcribir texto a notación IPA"""
-        if not hasattr(self, 'phonetic_entry'):
+    # Métodos para herramientas de texto
+    def update_tool_selection(self, tool: str) -> None:
+        """Actualizar la herramienta seleccionada"""
+        self.selected_tool = tool
+    
+    def process_text_tool(self) -> None:
+        """Procesar el texto con la herramienta seleccionada"""
+        # Obtener texto sin .strip() para preservar saltos de línea al final
+        input_text = self.tools_input.get("1.0", tk.END)
+        # Solo eliminar el \n final que tkinter agrega automáticamente
+        if input_text.endswith('\n'):
+            input_text = input_text[:-1]
+        
+        if not input_text.strip():
+            messagebox.showwarning("Warning", "Please enter some English text to transcribe.")
             return
-            
-        self.disable_transcribe_btn()
-        text: str = self.phonetic_entry.get("1.0", tk.END).strip()
+        
+        # Deshabilitar botón mientras procesa
+        self.btn_process.config(state=tk.DISABLED, text="Transcribing...")
+        self.root.update_idletasks()
         
         try:
-            result: str = self.app.transcribe_to_ipa(text)
-            self.display_phonetic_result(result)
+            tool = self.tool_var.get()
+            result = self.apply_text_tool(input_text, tool)
+            
+            # Mostrar resultado
+            self.tools_output.config(state=tk.NORMAL)
+            self.tools_output.delete("1.0", tk.END)
+            self.tools_output.insert("1.0", result)
+            self.tools_output.config(state=tk.DISABLED)
+            
         except Exception as e:
-            error_msg = f"Error: {str(e)}"
-            self.display_phonetic_result(error_msg)
+            messagebox.showerror("Error", f"Error processing text: {str(e)}")
         finally:
-            self.enable_transcribe_btn()
+            # Rehabilitar botón
+            self.btn_process.config(state=tk.NORMAL, text="Transcribe")
+            self.root.update_idletasks()
     
-    def set_accent_from_description(self, description: str) -> None:
-        """Establecer acento basado en la descripción mostrada"""
-        if description == self.t["rp_accent"]:
+    def apply_text_tool(self, text: str, tool: str) -> str:
+        """Aplicar la transcripción IPA según el tipo seleccionado preservando saltos de línea"""
+        if tool == "RP IPA":
             try:
-                self.app.accent = "rp"
-            except ValueError as e:
-                messagebox.showerror("Error", str(e))
+                result = self.phonetic_transcriptor.transcribe_to_ipa(text, "rp")
+                if result:
+                    return f"/{result}/"
+                else:
+                    return "Error: Could not transcribe text to RP IPA"
+            except Exception as e:
+                return f"Error in RP IPA transcription: {str(e)}"
+                
+        elif tool == "American IPA":
+            try:
+                result = self.phonetic_transcriptor.transcribe_to_ipa(text, "american")
+                if result:
+                    return f"/{result}/"
+                else:
+                    return "Error: Could not transcribe text to American IPA"
+            except Exception as e:
+                return f"Error in American IPA transcription: {str(e)}"
+        else:
+            return "Unknown IPA type selected"
     
-    def display_phonetic_result(self, result: str) -> None:
-        """Mostrar resultado de transcripción fonética"""
-        if hasattr(self, 'phonetic_result_text'):
-            self.phonetic_result_text.config(state=tk.NORMAL)
-            self.phonetic_result_text.delete("1.0", tk.END)
-            self.phonetic_result_text.insert("1.0", result)
-            self.phonetic_result_text.config(state=tk.DISABLED)
-    
-    def disable_transcribe_btn(self) -> None:
-        """Deshabilitar botón de transcripción durante el procesamiento"""
-        if hasattr(self, 'btn_transcribe'):
-            self.btn_transcribe.config(state=tk.DISABLED, text="Transcribing...")
-            self.root.update_idletasks()
-    
-    def enable_transcribe_btn(self) -> None:
-        """Rehabilitar botón de transcripción"""
-        if hasattr(self, 'btn_transcribe'):
-            self.btn_transcribe.config(state=tk.NORMAL, text=self.t["transcribe_to_ipa"])
-            self.root.update_idletasks()
+    def clear_all_tools(self) -> None:
+        """Limpiar todos los campos de la pestaña de herramientas"""
+        self.tools_input.delete("1.0", tk.END)
+        self.tools_output.config(state=tk.NORMAL)
+        self.tools_output.delete("1.0", tk.END)
+        self.tools_output.config(state=tk.DISABLED)
+        self.tool_var.set("RP IPA")  # Reset to default
 
     def run(self) -> None:
         self.root.mainloop()

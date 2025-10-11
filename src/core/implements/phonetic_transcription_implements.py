@@ -1,8 +1,7 @@
 from src.core.interfaces.phonetic_transcription_interface import PhoneticTranscriptionInterface
-from src.services.phonetic_transcription_service import (
-    transcribe_text_to_ipa_rp, 
-    is_valid_english_text
-)
+from src.services.american_ipa_service import transcribe_to_american_ipa
+from src.services.rp_ipa_service import transcribe_to_rp_ipa
+from src.services.phonetic_transcription_service import is_valid_english_text
 
 class PhoneticTranscriptionImplements(PhoneticTranscriptionInterface):
     """
@@ -12,7 +11,7 @@ class PhoneticTranscriptionImplements(PhoneticTranscriptionInterface):
     
     def __init__(self):
         # Lista de acentos soportados
-        self._supported_accents = ["rp"]  # Solo RP por ahora
+        self._supported_accents = ["rp", "american"]  # RP y American IPA
         
     def transcribe_to_ipa(self, text: str, accent: str = "rp") -> str:
         """
@@ -41,11 +40,12 @@ class PhoneticTranscriptionImplements(PhoneticTranscriptionInterface):
             if not is_valid_english_text(text):
                 raise ValueError("El texto no parece estar en inglés. La transcripción IPA requiere texto en inglés.")
             
-            # Transcribir según el acento
+            # Transcribir según el acento usando servicios específicos
             if accent == "rp":
-                return transcribe_text_to_ipa_rp(text)
+                return transcribe_to_rp_ipa(text)
+            elif accent == "american":
+                return transcribe_to_american_ipa(text)
             else:
-                # Por ahora solo soportamos RP
                 raise ValueError(f"Acento '{accent}' no implementado")
                 
         except ValueError:
@@ -87,7 +87,8 @@ class PhoneticTranscriptionImplements(PhoneticTranscriptionInterface):
             str: Descripción del acento
         """
         accent_descriptions = {
-            "rp": "Received Pronunciation (British Standard)"
+            "rp": "Received Pronunciation (British Standard)",
+            "american": "General American (American Standard)"
         }
         
         return accent_descriptions.get(accent.lower(), f"Acento desconocido: {accent}")

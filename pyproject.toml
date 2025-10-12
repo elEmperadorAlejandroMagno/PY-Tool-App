@@ -1,0 +1,23 @@
+[project]
+name = "py-project"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.14.2",
+    "eng-to-ipa>=0.0.2",
+    "epitran>=1.26.0",
+    "fpdf2==2.8.3",
+    "googletrans==4.0.0rc1",
+    "lxml>=6.0.2",
+    "pdfplumber==0.11.7",
+    "phonemizer>=3.3.0",
+    "python-docx==1.2.0",
+    "requests>=2.32.5",
+    "spacy==3.8.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy==1.17.1",
+]

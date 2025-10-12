@@ -188,15 +188,15 @@ class TranslatorGUI:
         )
         self.tool_menu.pack(pady=5)
         
-        # Checkbox para formas strong/weak
-        self.use_weak_forms_var = ctk.BooleanVar(value=True)  # Por defecto usa formas weak
-        weak_forms_checkbox = ctk.CTkCheckBox(
-            content_frame,
-            text="Use weak forms (unstressed)",
-            variable=self.use_weak_forms_var,
-            font=ctk.CTkFont(size=12)
-        )
-        weak_forms_checkbox.pack(pady=(15, 10))
+        # # Checkbox para formas strong/weak
+        # self.use_weak_forms_var = ctk.BooleanVar(value=True)  # Por defecto usa formas weak
+        # weak_forms_checkbox = ctk.CTkCheckBox(
+        #     content_frame,
+        #     text="Use weak forms (unstressed)",
+        #     variable=self.use_weak_forms_var,
+        #     font=ctk.CTkFont(size=12)
+        # )
+        # weak_forms_checkbox.pack(pady=(15, 10))
         
         # Input Text
         input_label = ctk.CTkLabel(content_frame, text="English Text:", font=ctk.CTkFont(size=14, weight="bold"))
@@ -253,7 +253,7 @@ class TranslatorGUI:
         
         # Limpiar y mostrar resultado
         self.result_textbox.delete("1.0", "end")
-        self.result_textbox.insert("1.0", result.text)
+        self.result_textbox.insert("1.0", result)
         
         self.enable_translate_btn(self.btn_translate)
 
@@ -365,13 +365,13 @@ class TranslatorGUI:
             except Exception as e:
                 return f"Error in RP IPA transcription: {str(e)}"
                 
-        elif tool == "American IPA":
+        elif tool == "AMERICAN IPA":
             try:
                 result = self.phonetic_transcriptor.transcribe_to_ipa(text, "american")
                 if result:
                     # Limpiar el resultado antes de devolverlo
                     cleaned_result = self.clean_output_text(result)
-                    return f"/{cleaned_result}/"
+                    return f"{cleaned_result}"
                 else:
                     return "Error: Could not transcribe text to American IPA"
             except Exception as e:

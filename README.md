@@ -1,34 +1,57 @@
 ## 🛠️ Instalación y ejecución rápida
 
-Este proyecto incluye un `Makefile` para facilitar la instalación de dependencias y la ejecución de la aplicación.
+Este proyecto utiliza `uv` para la gestión de dependencias y entornos virtuales, lo que hace la instalación más rápida y sencilla.
+
+### Prerrequisitos
+
+Asegúrate de tener `uv` instalado. Si no lo tienes, puedes instalarlo con:
+
+```bash
+# En Linux/macOS
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# O usando pip
+pip install uv
+```
+
+### Instalación del proyecto
 
 ```bash
 # Clonar el repositorio
 git clone https://github.com/elEmperadorAlejandroMagno/Python-APP-Final-Project.git
 ```
+
 ```bash
-# selecciona el directorio
+# Navegar al directorio del proyecto
 cd Python-APP-Final-Project
 ```
-Crea un entorno vitual para instalar las dependencias necesarias
+
 ```bash
-# Crear entorno virtual
-python -m venv .venv
+# Instalar dependencias (uv creará automáticamente el entorno virtual)
+uv sync
 ```
-```bash
-# Iniciar entorno en Linux/macOS
-source .venv/bin/activate
-```
-```bash
-# Iniciar entorno en Windows
-.venv\\Scripts\\activate 
-```
-El proyecto utiliza makefile para simplificar la instalación de dependecias y la ejecución del programa
-```bash
-# Instalar dependencias | Crea y ejecuta un entorno virtual si no lo hiciste previamente
-make install
-```
+
+### Ejecución
+
 ```bash
 # Ejecutar la aplicación
-make run
+uv run python app.py
+```
+
+### Comandos útiles
+
+```bash
+# Agregar una nueva dependencia
+uv add nombre-del-paquete
+
+# Instalar dependencias de desarrollo
+uv sync --dev
+
+# Ejecutar comandos en el entorno virtual
+uv run <comando>
+
+# Activar el entorno virtual manualmente (opcional)
+source .venv/bin/activate  # Linux/macOS
+# o
+.venv\Scripts\activate     # Windows
 ```

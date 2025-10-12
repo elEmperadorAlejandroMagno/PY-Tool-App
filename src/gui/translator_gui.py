@@ -1,5 +1,5 @@
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+import customtkinter as ctk
+from tkinter import filedialog, messagebox
 from typing import Optional, Dict, Any
 import re
 from src.core.factories.translator_factory import create_translator_app
@@ -10,30 +10,33 @@ class TranslatorGUI:
         self.app = create_translator_app(lang)
         self.t: Dict[str, Any] = self.app.t
         self.file_path: Optional[str] = None
-        self.entry_languages = [lang for lang in self.app.languages] + ["detect"]
-        self.output_languages = [lang for lang in self.app.languages]
+        self.entry_languages = [lang.upper() for lang in self.app.languages] + ["DETECT"]
+        self.output_languages = [lang.upper() for lang in self.app.languages]
         
         # Inicializar el servicio de transcripción fonética
         self.phonetic_transcriptor = PhoneticTranscriptionImplements()
 
-        self.root: tk.Tk = tk.Tk()
-        self.root.title(self.t["title"])
-
-        # Crear Notebook (pestañas)
-        self.notebook = ttk.Notebook(self.root)
-        self.notebook.pack(fill="both", expand=True, padx=10, pady=10)
-
-        # Frame para traducir texto
-        self.text_tab = tk.Frame(self.notebook)
-        self.notebook.add(self.text_tab, text=self.t["translate"])
-
-        # Frame para traducir archivo
-        self.file_tab = tk.Frame(self.notebook)
-        self.notebook.add(self.file_tab, text=self.t["translate_file"])
+        # Configurar apariencia de CustomTkinter
+        ctk.set_appearance_mode("dark")  # Modes: "System" (standard), "Dark", "Light"
+        ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
         
-        # Frame para herramientas
-        self.tools_tab = tk.Frame(self.notebook)
-        self.notebook.add(self.tools_tab, text="IPA Transcription")
+        self.root: ctk.CTk = ctk.CTk()
+        self.root.title(self.t["title"])
+        self.root.geometry("900x700")
+
+        # Crear sistema de pestañas con CustomTkinter
+        self.notebook = ctk.CTkTabview(self.root, width=850, height=650)
+        self.notebook.pack(fill="both", expand=True, padx=20, pady=20)
+
+        # Agregar pestañas
+        self.notebook.add(self.t["translate"])
+        self.notebook.add(self.t["translate_file"])
+        self.notebook.add("IPA Transcription")
+        
+        # Obtener referencias a los frames de las pestañas
+        self.text_tab = self.notebook.tab(self.t["translate"])
+        self.file_tab = self.notebook.tab(self.t["translate_file"])
+        self.tools_tab = self.notebook.tab("IPA Transcription")
 
         # Renderizar cada apartado
         self.render_text_tab()
@@ -42,160 +45,216 @@ class TranslatorGUI:
 
     def render_text_tab(self):
         # frame interno con padding
-        content_frame = tk.Frame(self.text_tab)
-        content_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        content_frame = ctk.CTkFrame(self.text_tab)
+        content_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        
         # Menús de idioma
-        entry_label = tk.Label(content_frame, text=self.t["select_language_from"])
-        entry_label.pack()
-        self.entry_language_var = tk.StringVar(value="detect")
-        entry_menu = tk.OptionMenu(
+        entry_label = ctk.CTkLabel(content_frame, text=self.t["select_language_from"], font=ctk.CTkFont(size=14, weight="bold"))
+        entry_label.pack(pady=(10, 5))
+        
+        self.entry_language_var = ctk.StringVar(value="DETECT")
+        self.entry_menu = ctk.CTkOptionMenu(
             content_frame,
-            self.entry_language_var,
-            *self.entry_languages,
-            command=lambda value: self.set_entry_language(str(value))
+            values=self.entry_languages,
+            variable=self.entry_language_var,
+            command=self.set_entry_language,
+            width=200,
+            height=32,
+            font=ctk.CTkFont(size=12, weight="bold")
         )
-        entry_menu.pack(pady=5)
-        entry_menu.config(width=5)
+        self.entry_menu.pack(pady=5)
 
-        output_label = tk.Label(content_frame, text=self.t["select_language_to"])
-        output_label.pack()
-        self.output_language_var = tk.StringVar(value=self.app.lang)
-        output_menu = tk.OptionMenu(
+        output_label = ctk.CTkLabel(content_frame, text=self.t["select_language_to"], font=ctk.CTkFont(size=14, weight="bold"))
+        output_label.pack(pady=(15, 5))
+        
+        self.output_language_var = ctk.StringVar(value=self.app.lang.upper())
+        self.output_menu = ctk.CTkOptionMenu(
             content_frame,
-            self.output_language_var,
-            *self.output_languages,
-            command=lambda value: self.set_output_language(str(value))
+            values=self.output_languages,
+            variable=self.output_language_var,
+            command=self.set_output_language,
+            width=200,
+            height=32,
+            font=ctk.CTkFont(size=12, weight="bold")
         )
-        output_menu.pack(pady=5)
-        output_menu.config(width=5)
+        self.output_menu.pack(pady=5)
 
-        # Entrada de texto y botón
-        self.entry = tk.Text(content_frame, width=50, height=5)
-        self.entry.pack(pady=10)
-        self.result_label = tk.Label(content_frame, text="")
-        self.result_label.pack(pady=10)
-        self.btn_translate = tk.Button(content_frame, text=self.t["translate"], command=self.translate_text)
-        self.btn_translate.pack(pady=10)
+        # Entrada de texto
+        input_label = ctk.CTkLabel(content_frame, text="Text to translate:", font=ctk.CTkFont(size=14, weight="bold"))
+        input_label.pack(pady=(20, 5))
+        
+        self.entry = ctk.CTkTextbox(content_frame, width=700, height=120, font=ctk.CTkFont(size=16))
+        self.entry.pack(pady=5)
+        
+        # Botón de traducir
+        self.btn_translate = ctk.CTkButton(
+            content_frame, 
+            text=self.t["translate"], 
+            command=self.translate_text,
+            width=200,
+            height=40,
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        self.btn_translate.pack(pady=15)
+        
+        # Resultado
+        result_label = ctk.CTkLabel(content_frame, text="Translation result:", font=ctk.CTkFont(size=14, weight="bold"))
+        result_label.pack(pady=(10, 5))
+        
+        self.result_textbox = ctk.CTkTextbox(content_frame, width=700, height=120, font=ctk.CTkFont(size=16))
+        self.result_textbox.pack(pady=5)
 
     def render_file_tab(self):
         # frame interno con padding
-        content_frame = tk.Frame(self.file_tab)
-        content_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        content_frame = ctk.CTkFrame(self.file_tab)
+        content_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        
         # Menús de idioma
-        entry_label = tk.Label(content_frame, text=self.t["select_language_from"])
-        entry_label.pack()
-        self.entry_language_var_file = tk.StringVar(value="detect")
-        entry_menu = tk.OptionMenu(
+        entry_label = ctk.CTkLabel(content_frame, text=self.t["select_language_from"], font=ctk.CTkFont(size=14, weight="bold"))
+        entry_label.pack(pady=(10, 5))
+        
+        self.entry_language_var_file = ctk.StringVar(value="DETECT")
+        self.entry_menu_file = ctk.CTkOptionMenu(
             content_frame,
-            self.entry_language_var_file,
-            *self.entry_languages,
-            command=lambda value: self.set_entry_language_file(str(value))
+            values=self.entry_languages,
+            variable=self.entry_language_var_file,
+            command=self.set_entry_language_file,
+            width=200,
+            height=32,
+            font=ctk.CTkFont(size=12, weight="bold")
         )
-        entry_menu.pack(pady=5)
-        entry_menu.config(width=5)
+        self.entry_menu_file.pack(pady=5)
 
-        output_label = tk.Label(content_frame, text=self.t["select_language_to"])
-        output_label.pack()
-        self.output_language_var_file = tk.StringVar(value=self.app.lang)
-        output_menu = tk.OptionMenu(
+        output_label = ctk.CTkLabel(content_frame, text=self.t["select_language_to"], font=ctk.CTkFont(size=14, weight="bold"))
+        output_label.pack(pady=(15, 5))
+        
+        self.output_language_var_file = ctk.StringVar(value=self.app.lang.upper())
+        self.output_menu_file = ctk.CTkOptionMenu(
             content_frame,
-            self.output_language_var_file,
-            *self.output_languages,
-            command=lambda value: self.set_output_language_file(str(value))
+            values=self.output_languages,
+            variable=self.output_language_var_file,
+            command=self.set_output_language_file,
+            width=200,
+            height=32,
+            font=ctk.CTkFont(size=12, weight="bold")
         )
-        output_menu.pack(pady=5)
-        output_menu.config(width=5)
+        self.output_menu_file.pack(pady=5)
 
-        # Selección de archivo y botón
-        self.btn_file = tk.Button(content_frame, text=self.t["select_file"], command=self.get_file_path)
+        # Selección de archivo
+        file_label = ctk.CTkLabel(content_frame, text="File Selection:", font=ctk.CTkFont(size=14, weight="bold"))
+        file_label.pack(pady=(30, 10))
+        
+        self.btn_file = ctk.CTkButton(
+            content_frame, 
+            text=self.t["select_file"], 
+            command=self.get_file_path,
+            width=250,
+            height=40,
+            font=ctk.CTkFont(size=14)
+        )
         self.btn_file.pack(pady=10)
-        self.btn_translate_file = tk.Button(content_frame, text=self.t["translate_file"], state=tk.DISABLED, command=self.translate_file)
+        
+        self.btn_translate_file = ctk.CTkButton(
+            content_frame, 
+            text=self.t["translate_file"], 
+            state="disabled", 
+            command=self.translate_file,
+            width=250,
+            height=40,
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
         self.btn_translate_file.pack(pady=10)
     
     def render_tools_tab(self):
         """Renderiza la pestaña de herramientas"""
         # Frame principal con padding
-        content_frame = tk.Frame(self.tools_tab)
-        content_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        content_frame = ctk.CTkFrame(self.tools_tab)
+        content_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
         # Select/Dropdown para elegir tipo de IPA
-        tool_label = tk.Label(content_frame, text="Select IPA Type:")
-        tool_label.pack(pady=(0, 5))
+        tool_label = ctk.CTkLabel(content_frame, text="Select IPA Type:", font=ctk.CTkFont(size=14, weight="bold"))
+        tool_label.pack(pady=(10, 5))
         
-        self.tool_var = tk.StringVar(value="RP IPA")
-        tool_options = ["RP IPA", "American IPA"]
-        tool_menu = tk.OptionMenu(
+        self.tool_var = ctk.StringVar(value="RP IPA")
+        tool_options = ["RP IPA", "AMERICAN IPA"]
+        self.tool_menu = ctk.CTkOptionMenu(
             content_frame,
-            self.tool_var,
-            *tool_options,
-            command=lambda value: self.update_tool_selection(str(value))
+            values=tool_options,
+            variable=self.tool_var,
+            command=self.update_tool_selection,
+            width=200,
+            height=32,
+            font=ctk.CTkFont(size=12, weight="bold")
         )
-        tool_menu.pack(pady=5)
-        tool_menu.config(width=15)
+        self.tool_menu.pack(pady=5)
         
         # Checkbox para formas strong/weak
-        self.use_weak_forms_var = tk.BooleanVar(value=True)  # Por defecto usa formas weak
-        weak_forms_checkbox = tk.Checkbutton(
+        self.use_weak_forms_var = ctk.BooleanVar(value=True)  # Por defecto usa formas weak
+        weak_forms_checkbox = ctk.CTkCheckBox(
             content_frame,
             text="Use weak forms (unstressed)",
             variable=self.use_weak_forms_var,
-            font=("Arial", 9)
+            font=ctk.CTkFont(size=12)
         )
-        weak_forms_checkbox.pack(pady=(10, 0))
+        weak_forms_checkbox.pack(pady=(15, 10))
         
         # Input Text
-        input_label = tk.Label(content_frame, text="English Text:")
-        input_label.pack(pady=(15, 5))
+        input_label = ctk.CTkLabel(content_frame, text="English Text:", font=ctk.CTkFont(size=14, weight="bold"))
+        input_label.pack(pady=(20, 5))
         
-        self.tools_input = tk.Text(content_frame, width=60, height=6)
+        self.tools_input = ctk.CTkTextbox(content_frame, width=700, height=120, font=ctk.CTkFont(size=16))
         self.tools_input.pack(pady=5)
         
         # Botón central (entre los inputs)
-        self.btn_process = tk.Button(
+        self.btn_process = ctk.CTkButton(
             content_frame,
             text="Transcribe",
             command=self.process_text_tool,
-            bg="#4CAF50",
-            fg="white",
-            font=("Arial", 10, "bold")
+            width=200,
+            height=40,
+            font=ctk.CTkFont(size=14, weight="bold")
         )
-        self.btn_process.pack(pady=10)
+        self.btn_process.pack(pady=15)
         
         # Output Text
-        output_label = tk.Label(content_frame, text="IPA Transcription:")
-        output_label.pack(pady=(5, 5))
+        output_label = ctk.CTkLabel(content_frame, text="IPA Transcription:", font=ctk.CTkFont(size=14, weight="bold"))
+        output_label.pack(pady=(10, 5))
         
-        self.tools_output = tk.Text(
+        self.tools_output = ctk.CTkTextbox(
             content_frame,
-            width=60,
-            height=6,
-            state=tk.DISABLED,
-            bg="#f0f0f0",
-            font=("Arial Unicode MS", 12)  # Fuente que soporta bien caracteres IPA
+            width=700,
+            height=120,
+            font=ctk.CTkFont(family="Arial Unicode MS", size=16)  # Fuente que soporta bien caracteres IPA
         )
         self.tools_output.pack(pady=5)
         
         # Frame para el botón inferior en la esquina
-        bottom_frame = tk.Frame(content_frame)
-        bottom_frame.pack(fill="x", pady=(10, 0))
+        bottom_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
+        bottom_frame.pack(fill="x", pady=(15, 0))
         
         # Botón en la esquina inferior derecha
-        self.btn_clear_all = tk.Button(
+        self.btn_clear_all = ctk.CTkButton(
             bottom_frame,
             text="Clear All",
             command=self.clear_all_tools,
-            bg="#f44336",
-            fg="white",
-            font=("Arial", 9)
+            width=120,
+            height=32,
+            font=ctk.CTkFont(size=12),
+            fg_color="#dc3545",
+            hover_color="#c82333"
         )
         self.btn_clear_all.pack(side="right")
 
     # Métodos para pestaña de texto
     def translate_text(self) -> None:
         self.disable_translate_btn(self.btn_translate)
-        text: str = self.entry.get("1.0", tk.END).strip()
+        text: str = self.entry.get("1.0", "end").strip()
         result: str = self.app.translate_text(text)
-        self.result_label.config(text=result.text)
+        
+        # Limpiar y mostrar resultado
+        self.result_textbox.delete("1.0", "end")
+        self.result_textbox.insert("1.0", result.text)
+        
         self.enable_translate_btn(self.btn_translate)
 
     # Métodos para pestaña de archivo
@@ -216,15 +275,15 @@ class TranslatorGUI:
 
     def enable_file_button(self) -> None:
         if self.file_path:
-            self.btn_translate_file.config(state=tk.NORMAL)
-            self.btn_file.config(text=self.file_path.split("/")[-1])
+            self.btn_translate_file.configure(state="normal")
+            self.btn_file.configure(text=self.file_path.split("/")[-1])
 
-    def disable_translate_btn(self, button: tk.Button) -> None:
-        button.config(state=tk.DISABLED, text="Translating...")
+    def disable_translate_btn(self, button: ctk.CTkButton) -> None:
+        button.configure(state="disabled", text="Translating...")
         self.root.update_idletasks()
 
-    def enable_translate_btn(self, button: tk.Button) -> None:
-        button.config(state=tk.NORMAL, text=self.t["translate"])
+    def enable_translate_btn(self, button: ctk.CTkButton) -> None:
+        button.configure(state="normal", text=self.t["translate"])
         self.root.update_idletasks()
         
     def translate_file(self) -> None:
@@ -242,16 +301,16 @@ class TranslatorGUI:
 
     # Métodos para actualizar idioma en cada pestaña
     def set_entry_language(self, lang: str) -> None:
-        self.app.entry_language = lang
+        self.app.entry_language = lang.lower()
 
     def set_output_language(self, lang: str) -> None:
-        self.app.output_language = lang
+        self.app.output_language = lang.lower()
 
     def set_entry_language_file(self, lang: str) -> None:
-        self.app.entry_language = lang
+        self.app.entry_language = lang.lower()
 
     def set_output_language_file(self, lang: str) -> None:
-        self.app.output_language = lang
+        self.app.output_language = lang.lower()
     
     # Métodos para herramientas de texto
     def update_tool_selection(self, tool: str) -> None:
@@ -261,8 +320,8 @@ class TranslatorGUI:
     def process_text_tool(self) -> None:
         """Procesar el texto con la herramienta seleccionada"""
         # Obtener texto sin .strip() para preservar saltos de línea al final
-        raw_input_text = self.tools_input.get("1.0", tk.END)
-        # Solo eliminar el \n final que tkinter agrega automáticamente
+        raw_input_text = self.tools_input.get("1.0", "end")
+        # Solo eliminar el \n final que CustomTkinter agrega automáticamente
         if raw_input_text.endswith('\n'):
             raw_input_text = raw_input_text[:-1]
         
@@ -274,7 +333,7 @@ class TranslatorGUI:
             return
         
         # Deshabilitar botón mientras procesa
-        self.btn_process.config(state=tk.DISABLED, text="Transcribing...")
+        self.btn_process.configure(state="disabled", text="Transcribing...")
         self.root.update_idletasks()
         
         try:
@@ -282,16 +341,14 @@ class TranslatorGUI:
             result = self.apply_text_tool(input_text, tool)
             
             # Mostrar resultado
-            self.tools_output.config(state=tk.NORMAL)
-            self.tools_output.delete("1.0", tk.END)
+            self.tools_output.delete("1.0", "end")
             self.tools_output.insert("1.0", result)
-            self.tools_output.config(state=tk.DISABLED)
             
         except Exception as e:
             messagebox.showerror("Error", f"Error processing text: {str(e)}")
         finally:
             # Rehabilitar botón
-            self.btn_process.config(state=tk.NORMAL, text="Transcribe")
+            self.btn_process.configure(state="normal", text="Transcribe")
             self.root.update_idletasks()
     
     def apply_text_tool(self, text: str, tool: str) -> str:
@@ -324,10 +381,8 @@ class TranslatorGUI:
     
     def clear_all_tools(self) -> None:
         """Limpiar todos los campos de la pestaña de herramientas"""
-        self.tools_input.delete("1.0", tk.END)
-        self.tools_output.config(state=tk.NORMAL)
-        self.tools_output.delete("1.0", tk.END)
-        self.tools_output.config(state=tk.DISABLED)
+        self.tools_input.delete("1.0", "end")
+        self.tools_output.delete("1.0", "end")
         self.tool_var.set("RP IPA")  # Reset to default
         
     def clean_input_text(self, text: str) -> str:

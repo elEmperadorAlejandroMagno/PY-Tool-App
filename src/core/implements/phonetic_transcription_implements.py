@@ -1,7 +1,6 @@
 from src.core.interfaces.phonetic_transcription_interface import PhoneticTranscriptionInterface
 from src.services.american_ipa_service import transcribe_to_american_ipa
-from src.services.rp_ipa_service import transcribe_to_rp_ipa
-from src.services.phonetic_transcription_service import is_valid_english_text
+from src.services.rp_ipa_service import transcribe_to_rp_ipa, is_valid_english_text
 
 class PhoneticTranscriptionImplements(PhoneticTranscriptionInterface):
     """

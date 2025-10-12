@@ -6,11 +6,238 @@ from phonemizer import phonemize
 from typing import Optional
 import eng_to_ipa as ipa
 import re
+from typing import Optional
 
-# Diccionario de correcciones específicas para RP IPA
+# Diccionario específico de palabras comunes con transcripción RP
+# Basado en el diccionario Longman y otros recursos de RP
+RP_WORD_DICTIONARY = {
+    # Palabras básicas
+    "hello": "həˈləʊ",
+    "world": "wɜːld", 
+    "the": "ðə",
+    "and": "ænd",
+    "or": "ɔː",
+    "this": "ðɪs",
+    "that": "ðæt",
+    "is": "ɪz",
+    "are": "ɑː",
+    "was": "wɒz",
+    "were": "wɜː",
+    "have": "hæv",
+    "has": "hæz",
+    "had": "hæd",
+    "will": "wɪl",
+    "would": "wʊd",
+    "could": "kʊd",
+    "should": "ʃʊd",
+    "can": "kæn",
+    "cannot": "ˈkænɒt",
+    "can't": "kɑːnt",
+    
+    # Palabras académicas comunes
+    "university": "ˌjuːnɪˈvɜːsəti",
+    "pronunciation": "prəˌnʌnsɪˈeɪʃən",
+    "phonetic": "fəˈnetɪk",
+    "phonetics": "fəˈnetɪks",
+    "received": "rɪˈsiːvd",
+    "british": "ˈbrɪtɪʃ",
+    "english": "ˈɪŋglɪʃ",
+    "standard": "ˈstændəd",
+    "dictionary": "ˈdɪkʃənri",
+    "language": "ˈlæŋgwɪdʒ",
+    "linguistics": "lɪŋˈgwɪstɪks",
+    "transcription": "trænˈskrɪpʃən",
+    "international": "ˌɪntəˈnæʃənəl",
+    "alphabet": "ˈælfəbet",
+    
+    # Palabras con diferencias claras GA vs RP
+    "car": "kɑː",
+    "park": "pɑːk", 
+    "start": "stɑːt",
+    "dance": "dɑːns",
+    "path": "pɑːθ",
+    "ask": "ɑːsk",
+    "answer": "ˈɑːnsə",
+    "after": "ˈɑːftə",
+    "class": "klɑːs",
+    "glass": "glɑːs",
+    "last": "lɑːst",
+    "fast": "fɑːst",
+    "past": "pɑːst",
+    "castle": "ˈkɑːsəl",
+    "laugh": "lɑːf",
+    "aunt": "ɑːnt",
+    
+    # Palabras con LOT vowel
+    "hot": "hɒt",
+    "got": "gɒt",
+    "lot": "lɒt",
+    "not": "nɒt",
+    "top": "tɒp",
+    "stop": "stɒp",
+    "shop": "ʃɒp",
+    "dog": "dɒg",
+    "long": "lɒŋ",
+    "song": "sɒŋ",
+    "wrong": "rɒŋ",
+    
+    # Palabras con GOAT diphthong
+    "go": "gəʊ",
+    "no": "nəʊ", 
+    "so": "səʊ",
+    "show": "ʃəʊ",
+    "know": "nəʊ",
+    "home": "həʊm",
+    "phone": "fəʊn",
+    "close": "kləʊs",
+    "most": "məʊst",
+    "post": "pəʊst",
+    
+    # Palabras sin R rótica
+    "here": "hɪə",
+    "there": "ðeə",
+    "where": "weə",
+    "care": "keə",
+    "fair": "feə",
+    "hair": "heə",
+    "chair": "tʃeə",
+    "sure": "ʃʊə",
+    "poor": "pʊə",
+    "tour": "tʊə",
+    "year": "jɪə",
+    "near": "nɪə",
+    "clear": "klɪə",
+    "dear": "dɪə",
+    "beer": "bɪə",
+    "fear": "fɪə",
+    
+    # Palabras de prueba adicionales
+    "water": "ˈwɔːtə",
+    "father": "ˈfɑːðə", 
+    "mother": "ˈmʌðə",
+    "brother": "ˈbrʌðə",
+    "sister": "ˈsɪstə",
+    "teacher": "ˈtiːtʃə",
+    "student": "ˈstjuːdənt",
+    "school": "skuːl",
+    "learn": "lɜːn",
+    "study": "ˈstʌdi",
+    "test": "test",
+    "exam": "ɪgˈzæm",
+    "book": "bʊk",
+    "read": "riːd",  # presente
+    "write": "raɪt",
+    "speak": "spiːk",
+    "listen": "ˈlɪsən",
+    "understand": "ˌʌndəˈstænd",
+    
+    # Palabras comunes con /e/ (DRESS vowel)
+    "red": "red",
+    "bed": "bed",
+    "ten": "ten",
+    "pen": "pen",
+    "men": "men",
+    "when": "wen",
+    "then": "ðen",
+    "them": "ðem",
+    "get": "get",
+    "let": "let",
+    "met": "met",
+    "set": "set",
+    "net": "net",
+    "wet": "wet",
+    "yet": "jet",
+    "yes": "jes",
+    "help": "help",
+    "tell": "tel",
+    "well": "wel",
+    "sell": "sel",
+    "fell": "fel",
+    "bell": "bel",
+    "cell": "sel",
+    "left": "left",
+    "next": "nekst",
+    "best": "best",
+    "rest": "rest",
+    "west": "west",
+    "nest": "nest",
+    "chest": "tʃest",
+    "fresh": "freʃ",
+    "dress": "dres",
+    "press": "pres",
+    "less": "les",
+    "mess": "mes",
+    "guess": "ges",
+    "bless": "bles",
+    "stress": "stres",
+    "express": "ɪkˈspres",
+    "success": "səkˈses",
+    "progress": "ˈprəʊgres",  # noun form
+    "address": "əˈdres",
+    "access": "ˈækses",
+    "process": "ˈprəʊses",  # noun form
+    "possess": "pəˈzes",
+    "assess": "əˈses",
+    "unless": "ənˈles",
+    "impress": "ɪmˈpres",
+    "suppress": "səˈpres",
+    "depress": "dɪˈpres",
+    "compress": "kəmˈpres",
+    
+    # Palabras de poesía/literatura comunes
+    "roses": "ˈrəʊzez",
+    "violets": "ˈvaɪəlets",
+    "blue": "bluː",
+    "great": "greɪt",
+    "you": "juː",
+    
+    # Palabras adicionales comunes
+    "back": "bæk",
+    "our": "aʊə",
+    "weekly": "ˈwiːkli",
+    "time": "taɪm",
+    "now": "naʊ",
+    "today": "təˈdeɪ",
+    "by": "baɪ",
+    "young": "jʌŋ",
+    "blogger": "ˈblɒɡə",
+    "travel": "ˈtrævəl",
+    "good": "ɡʊd",
+    "hi": "haɪ",
+    "justin": "ˈdʒʌstɪn",
+    
+    # Palabras con TRAP vowel /æ/ que suelen transcribirse mal
+    "happy": "ˈhæpi",
+    "animal": "ˈænɪməl",
+    "cat": "kæt",
+    "bad": "bæd",
+    "hand": "hænd",
+    "man": "mæn",
+    "thank": "θæŋk",
+    "family": "ˈfæməli",
+    "black": "blæk",
+    "track": "træk",
+    "pack": "pæk",
+    "fact": "fækt",
+    "act": "ækt",
+    "add": "æd",
+    "bag": "bæɡ",
+    "hat": "hæt",
+    "sat": "sæt",
+    "ran": "ræn",
+    "van": "væn",
+    "plan": "plæn",
+    "every": "ˈevri",
+    "it's": "ɪts",
+    "to": "tə",
+    "be": "bi",
+}
+
+# Diccionario de correcciones específicas para RP IPA (fallback)
 RP_CORRECTIONS = {
     # Palabras específicas con problemas
     'hapi': 'ˈhæpi',
+    'anɪməl': 'ˈænɪməl',  # Corrección para 'animal'
     
     # Corrección para 'every' - usar 'i' final en lugar de 'ɪ'
     'evrɪ': 'ˈevri',    # Cambiar ɪ final a i y agregar stress mark
@@ -22,6 +249,45 @@ RP_CORRECTIONS = {
     'ɐgriː': 'əˈɡriː',
     'ɐnʌðər': 'əˈnʌðə',
 }
+
+
+def is_valid_english_text(text: str) -> bool:
+    """
+    Valida si el texto parece ser inglés apropiado para transcripción IPA.
+    Simplificada para aceptar cualquier texto no vacío.
+    
+    Args:
+        text (str): Texto a validar
+        
+    Returns:
+        bool: True si el texto no está vacío, False en caso contrario
+    """
+    if not text or not isinstance(text, str):
+        return False
+    
+    text = text.strip()
+    if not text:
+        return False
+    
+    # Aceptar cualquier texto que tenga contenido
+    return True
+
+
+def get_rp_transcription_from_dict(word: str) -> Optional[str]:
+    """
+    Obtiene la transcripción RP de una palabra desde el diccionario especializado.
+    
+    Args:
+        word (str): Palabra a transcribir
+    
+    Returns:
+        Optional[str]: Transcripción RP o None si no está en el diccionario
+    """
+    word_clean = word.lower().strip()
+    # Remover puntuación básica
+    word_clean = re.sub(r'[^\w]', '', word_clean)
+    
+    return RP_WORD_DICTIONARY.get(word_clean)
 
 
 def fix_rp_ipa_issues(text: str) -> str:
@@ -39,10 +305,9 @@ def fix_rp_ipa_issues(text: str) -> str:
     
     fixed = text
     
-    # 1. Corregir ɐ -> ə (problema principal de la schwa)
-    # Solo en contextos donde debería ser schwa
-    fixed = re.sub(r'\bɐ\b', 'ə', fixed)  # artículos como "a"
-    fixed = re.sub(r'\bɐ([mnlr])', r'ə\1', fixed)  # antes de consonantes como en "amazing"
+    # 1. Corregir ɐ -> ə (reemplazar TODAS las ocurrencias de ɐ con ə)
+    # Convertir absolutamente todos los casos de ɐ a ə
+    fixed = fixed.replace('ɐ', 'ə')
     
     # 2. Aplicar correcciones de palabras específicas
     for incorrect, correct in RP_CORRECTIONS.items():
@@ -52,9 +317,7 @@ def fix_rp_ipa_issues(text: str) -> str:
     # Happy y variantes (evitar doble stress mark)
     fixed = re.sub(r'\b(?:ˈ)?hæpi\b', 'ˈhæpi', fixed)
     
-    # 4. Asegurar que la schwa esté en posición átona correcta
-    # Para palabras que empiezan con vocal átona seguida de consonante+vocal tónica
-    fixed = re.sub(r'\bɐ([bcdfghjklmnpqrstvwxyz])([aeiouy])', r'ə\1\2', fixed)
+    # 4. Stress marks y limpieza final ya se maneja en otros pasos
     
     # 5. Limpiar stress marks duplicados
     fixed = re.sub(r'ˈˈ+', 'ˈ', fixed)
@@ -107,6 +370,7 @@ class RPIPAService:
     def transcribe(self, text: str) -> str:
         """
         Transcribe texto inglés a notación IPA RP (British)
+        Preserva los saltos de línea del texto original.
         
         Args:
             text (str): Texto en inglés para transcribir
@@ -117,27 +381,96 @@ class RPIPAService:
         if not text or not text.strip():
             return ""
         
-        try:
-            # Usar phonemizer con configuración británica
-            result = phonemize(
-                text.strip(),
-                language=self.language,
-                backend=self.backend,
-                strip=True,
-                preserve_punctuation=True,
-                njobs=1
-            )
-            
-            # Limpiar el resultado
-            return self._clean_ipa_output(result)
-            
-        except Exception as e:
-            # Fallback a eng_to_ipa si phonemizer falla
+        # Procesar línea por línea para preservar formato
+        lines = text.splitlines()
+        transcribed_lines = []
+        
+        for line in lines:
+            if not line.strip():
+                # Línea vacía, preservar
+                transcribed_lines.append('')
+                continue
+                
             try:
-                fallback_result = ipa.convert(text.strip())
-                return self._clean_ipa_output(fallback_result)
-            except Exception as fallback_error:
-                raise Exception(f"Error in RP IPA transcription: {str(e)}. Fallback error: {str(fallback_error)}")
+                # Primero intentar transcribir palabra por palabra con el diccionario
+                transcribed_line = self._transcribe_line_with_dict(line.strip())
+                transcribed_lines.append(transcribed_line)
+                
+            except Exception as e:
+                # Fallback a eng_to_ipa si phonemizer falla
+                try:
+                    fallback_result = ipa.convert(line.strip())
+                    cleaned_fallback = self._clean_ipa_output(fallback_result)
+                    transcribed_lines.append(cleaned_fallback)
+                except Exception as fallback_error:
+                    raise Exception(f"Error in RP IPA transcription: {str(e)}. Fallback error: {str(fallback_error)}")
+        
+        # Unir las líneas preservando los saltos de línea originales
+        return '\n'.join(transcribed_lines)
+    
+    def _transcribe_line_with_dict(self, line: str) -> str:
+        """
+        Transcribe una línea usando primero el diccionario RP_WORD_DICTIONARY
+        y luego phonemizer como fallback para palabras no encontradas.
+        
+        Args:
+            line (str): Línea a transcribir
+            
+        Returns:
+            str: Línea transcrita
+        """
+        if not line:
+            return ""
+        
+        # Dividir en palabras, preservando puntuación
+        words = re.findall(r'\b\w+\b|[.,!?;:\'-]', line)
+        transcribed_words = []
+        
+        for word in words:
+            if re.match(r'[.,!?;:\'-]', word):
+                # Es puntuación, mantener
+                transcribed_words.append(word)
+            else:
+                # Es palabra, buscar primero en el diccionario
+                dict_transcription = get_rp_transcription_from_dict(word)
+                if dict_transcription:
+                    # Encontrada en el diccionario, usar esa transcripción
+                    transcribed_words.append(dict_transcription)
+                else:
+                    # No encontrada en diccionario, usar phonemizer como fallback
+                    try:
+                        phonemizer_result = phonemize(
+                            word,
+                            language=self.language,
+                            backend=self.backend,
+                            strip=True,
+                            preserve_punctuation=False,
+                            njobs=1
+                        )
+                        # Limpiar el resultado de phonemizer
+                        cleaned_word = self._clean_ipa_output(phonemizer_result)
+                        transcribed_words.append(cleaned_word)
+                    except Exception:
+                        # Si phonemizer falla, usar eng_to_ipa como último recurso
+                        try:
+                            fallback_result = ipa.convert(word.lower())
+                            cleaned_fallback = self._clean_ipa_output(fallback_result)
+                            transcribed_words.append(cleaned_fallback)
+                        except Exception:
+                            # Si todo falla, mantener la palabra original
+                            transcribed_words.append(word)
+        
+        # Unir resultado de la línea
+        line_result = ' '.join(transcribed_words)
+        
+        # Limpiar espacios extra alrededor de puntuación
+        line_result = re.sub(r'\s+([.,!?;:\'-])', r'\1', line_result)
+        line_result = re.sub(r'\s{2,}', ' ', line_result.strip())
+        
+        # Aplicar transformaciones de símbolos finales
+        line_result = transform_symbols(line_result)
+        
+        return line_result
     
     def _clean_ipa_output(self, ipa_text: str) -> str:
         """
@@ -162,6 +495,10 @@ class RPIPAService:
         
         # Convertir ɛ a e según convención universitaria para RP
         cleaned = cleaned.replace('ɛ', 'e')
+        
+        # *** CONVERSIÓN GLOBAL DE SCHWA ***
+        # Asegurar que TODAS las ɐ se conviertan a ə (schwa estándar)
+        cleaned = cleaned.replace('ɐ', 'ə')
         
         # *** CORRECCIONES ESPECÍFICAS PARA RP IPA ***
         # Corregir problemas de schwa y stress marks

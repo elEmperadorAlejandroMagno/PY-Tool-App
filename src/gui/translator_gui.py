@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from typing import Optional, Dict, Any
+import re
 from src.core.factories.translator_factory import create_translator_app
 from src.core.implements.phonetic_transcription_implements import PhoneticTranscriptionImplements
 
@@ -260,10 +261,13 @@ class TranslatorGUI:
     def process_text_tool(self) -> None:
         """Procesar el texto con la herramienta seleccionada"""
         # Obtener texto sin .strip() para preservar saltos de línea al final
-        input_text = self.tools_input.get("1.0", tk.END)
+        raw_input_text = self.tools_input.get("1.0", tk.END)
         # Solo eliminar el \n final que tkinter agrega automáticamente
-        if input_text.endswith('\n'):
-            input_text = input_text[:-1]
+        if raw_input_text.endswith('\n'):
+            raw_input_text = raw_input_text[:-1]
+        
+        # Limpiar y normalizar el texto de entrada
+        input_text = self.clean_input_text(raw_input_text)
         
         if not input_text.strip():
             messagebox.showwarning("Warning", "Please enter some English text to transcribe.")
@@ -296,7 +300,9 @@ class TranslatorGUI:
             try:
                 result = self.phonetic_transcriptor.transcribe_to_ipa(text, "rp")
                 if result:
-                    return f"{result}"
+                    # Limpiar el resultado antes de devolverlo
+                    cleaned_result = self.clean_output_text(result)
+                    return cleaned_result
                 else:
                     return "Error: Could not transcribe text to RP IPA"
             except Exception as e:
@@ -306,7 +312,9 @@ class TranslatorGUI:
             try:
                 result = self.phonetic_transcriptor.transcribe_to_ipa(text, "american")
                 if result:
-                    return f"/{result}/"
+                    # Limpiar el resultado antes de devolverlo
+                    cleaned_result = self.clean_output_text(result)
+                    return f"/{cleaned_result}/"
                 else:
                     return "Error: Could not transcribe text to American IPA"
             except Exception as e:
@@ -321,6 +329,58 @@ class TranslatorGUI:
         self.tools_output.delete("1.0", tk.END)
         self.tools_output.config(state=tk.DISABLED)
         self.tool_var.set("RP IPA")  # Reset to default
+        
+    def clean_input_text(self, text: str) -> str:
+        """Limpia y normaliza el texto de entrada"""
+        if not text:
+            return ""
+        
+        # Normalizar diferentes tipos de comillas y apostrofes
+        text = text.replace('\u201c', '"').replace('\u201d', '"')  # comillas dobles
+        text = text.replace('\u2018', "'").replace('\u2019', "'")  # comillas simples
+        
+        # Normalizar espacios múltiples pero preservar saltos de línea
+        # Solo reemplazar espacios múltiples en la misma línea
+        lines = text.splitlines()
+        cleaned_lines = []
+        for line in lines:
+            # Limpiar espacios múltiples y tabs en cada línea
+            cleaned_line = re.sub(r'[ \t]+', ' ', line.strip())
+            cleaned_lines.append(cleaned_line)
+        
+        # Reunir las líneas preservando estructura
+        result = '\n'.join(cleaned_lines)
+        
+        # Remover líneas vacías múltiples (más de 2 seguidas)
+        result = re.sub(r'\n{3,}', '\n\n', result)
+        
+        return result
+    
+    def clean_output_text(self, text: str) -> str:
+        """Limpia y normaliza el texto de salida de transcripción"""
+        if not text:
+            return ""
+        
+        # Reemplazar todas las ɐ con ə (schwa estándar)
+        text = text.replace('ɐ', 'ə')
+        
+        # Limpiar espacios extra alrededor de puntuación
+        text = re.sub(r'\s+([.,!?;:\'-])', r'\1', text)
+        
+        # Normalizar espacios múltiples pero preservar saltos de línea
+        lines = text.splitlines()
+        cleaned_lines = []
+        for line in lines:
+            # Solo limpiar espacios múltiples en cada línea
+            cleaned_line = re.sub(r' {2,}', ' ', line.strip())
+            cleaned_lines.append(cleaned_line)
+        
+        result = '\n'.join(cleaned_lines)
+        
+        # Remover líneas vacías múltiples innecesarias
+        result = re.sub(r'\n{3,}', '\n\n', result)
+        
+        return result.strip()
 
     def run(self) -> None:
         self.root.mainloop()

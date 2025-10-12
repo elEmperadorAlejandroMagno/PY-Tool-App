@@ -53,6 +53,7 @@ class AmericanIPAService:
     def transcribe(self, text: str) -> str:
         """
         Transcribe texto inglés a notación IPA American
+        Preserva los saltos de línea del texto original.
         
         Args:
             text (str): Texto en inglés para transcribir
@@ -63,27 +64,42 @@ class AmericanIPAService:
         if not text or not text.strip():
             return ""
         
-        try:
-            # Usar phonemizer con configuración americana
-            result = phonemize(
-                text.strip(),
-                language=self.language,
-                backend=self.backend,
-                strip=True,
-                preserve_punctuation=True,
-                njobs=1
-            )
-            
-            # Limpiar el resultado y aplicar ajustes específicos americanos
-            return self._clean_and_americanize_ipa(result)
-            
-        except Exception as e:
-            # Fallback a eng_to_ipa si phonemizer falla
+        # Procesar línea por línea para preservar formato
+        lines = text.splitlines()
+        transcribed_lines = []
+        
+        for line in lines:
+            if not line.strip():
+                # Línea vacía, preservar
+                transcribed_lines.append('')
+                continue
+                
             try:
-                fallback_result = ipa.convert(text.strip())
-                return self._clean_and_americanize_ipa(fallback_result)
-            except Exception as fallback_error:
-                raise Exception(f"Error in American IPA transcription: {str(e)}. Fallback error: {str(fallback_error)}")
+                # Usar phonemizer con configuración americana
+                result = phonemize(
+                    line.strip(),
+                    language=self.language,
+                    backend=self.backend,
+                    strip=True,
+                    preserve_punctuation=True,
+                    njobs=1
+                )
+                
+                # Limpiar el resultado y aplicar ajustes específicos americanos
+                cleaned_result = self._clean_and_americanize_ipa(result)
+                transcribed_lines.append(cleaned_result)
+                
+            except Exception as e:
+                # Fallback a eng_to_ipa si phonemizer falla
+                try:
+                    fallback_result = ipa.convert(line.strip())
+                    cleaned_fallback = self._clean_and_americanize_ipa(fallback_result)
+                    transcribed_lines.append(cleaned_fallback)
+                except Exception as fallback_error:
+                    raise Exception(f"Error in American IPA transcription: {str(e)}. Fallback error: {str(fallback_error)}")
+        
+        # Unir las líneas preservando los saltos de línea originales
+        return '\n'.join(transcribed_lines)
     
     def _clean_and_americanize_ipa(self, ipa_text: str) -> str:
         """

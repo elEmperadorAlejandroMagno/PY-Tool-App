@@ -89,10 +89,10 @@ def transform_symbols(text: str) -> str:
     transformed = transformed.replace('?', '(?)')
     
     # Transformar . a // (hacer esto después de ! y ? para evitar conflictos)
-    transformed = transformed.replace('.', '//')
+    transformed = transformed.replace('.', ' //')
     
     # Transformar , a /
-    transformed = transformed.replace(',', '/')
+    transformed = transformed.replace(',', ' /')
     
     return transformed
 

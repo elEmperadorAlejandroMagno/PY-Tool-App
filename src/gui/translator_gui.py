@@ -296,7 +296,7 @@ class TranslatorGUI:
             try:
                 result = self.phonetic_transcriptor.transcribe_to_ipa(text, "rp")
                 if result:
-                    return f"/{result}/"
+                    return f"{result}"
                 else:
                     return "Error: Could not transcribe text to RP IPA"
             except Exception as e:

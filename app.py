@@ -1,5 +1,4 @@
 import argparse
-import tkinter as tk
 import sys
 from typing import List
 from src.config.i18n import get_available_languages

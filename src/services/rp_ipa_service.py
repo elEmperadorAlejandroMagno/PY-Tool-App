@@ -33,6 +33,16 @@ RP_WORD_DICTIONARY = {
     "can": "kæn",
     "cannot": "ˈkænɒt",
     "can't": "kɑːnt",
+    "thanks": "θænks",
+    "really": "rɪali",
+    "one": "wʌn",
+    "at": "ət",
+    "of": "əv",
+    "from":	"frəm",
+    "and": "ən",
+    "grand": "ɡrænd", 
+    "ambition": "æmbɪʃən",
+    "a": "ə",	
     
     # Palabras académicas comunes
     "university": "ˌjuːnɪˈvɜːsəti",

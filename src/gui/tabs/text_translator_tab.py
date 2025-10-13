@@ -126,7 +126,7 @@ class TextTranslatorTab(TabInterface):
             
             # Limpiar y mostrar resultado
             self.result_textbox.delete("1.0", "end")
-            self.result_textbox.insert("1.0", result.text)
+            self.result_textbox.insert("1.0", result)
             
         except Exception as e:
             # Manejar errores si es necesario

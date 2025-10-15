@@ -165,7 +165,8 @@ class IpaTranscriptionTab(TabInterface):
         
         try:
             tool = self.tool_var.get()
-            result = self._apply_text_tool(input_text, tool)
+            use_weak_forms = self.use_weak_forms_var.get()
+            result = self._apply_text_tool(input_text, tool, use_weak_forms)
             
             # Mostrar resultado
             self.tools_output.delete("1.0", "end")
@@ -178,20 +179,21 @@ class IpaTranscriptionTab(TabInterface):
             self.btn_process.configure(state="normal", text="Transcribe")
             self.parent_frame.master.update_idletasks()
             
-    def _apply_text_tool(self, text: str, tool: str) -> str:
+    def _apply_text_tool(self, text: str, tool: str, use_weak_forms: bool = True) -> str:
         """
         Aplica la transcripción IPA según el tipo seleccionado preservando saltos de línea.
         
         Args:
             text: Texto a transcribir
             tool: Tipo de IPA a usar
+            use_weak_forms: Si aplicar formas débiles
             
         Returns:
             Texto transcrito a IPA
         """
         if tool == "RP IPA":
             try:
-                result = self.phonetic_transcriptor.transcribe_to_ipa(text, "rp")
+                result = self.phonetic_transcriptor.transcribe_to_ipa(text, "rp", use_weak_forms)
                 if result:
                     # Limpiar el resultado antes de devolverlo
                     cleaned_result = self._clean_output_text(result)
@@ -203,7 +205,7 @@ class IpaTranscriptionTab(TabInterface):
                 
         elif tool == "AMERICAN IPA":
             try:
-                result = self.phonetic_transcriptor.transcribe_to_ipa(text, "american")
+                result = self.phonetic_transcriptor.transcribe_to_ipa(text, "american", use_weak_forms)
                 if result:
                     # Limpiar el resultado antes de devolverlo
                     cleaned_result = self._clean_output_text(result)

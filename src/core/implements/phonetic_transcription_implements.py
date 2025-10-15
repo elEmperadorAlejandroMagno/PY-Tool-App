@@ -12,13 +12,14 @@ class PhoneticTranscriptionImplements(PhoneticTranscriptionInterface):
         # Lista de acentos soportados
         self._supported_accents = ["rp", "american"]  # RP y American IPA
         
-    def transcribe_to_ipa(self, text: str, accent: str = "rp") -> str:
+    def transcribe_to_ipa(self, text: str, accent: str = "rp", use_weak_forms: bool = True) -> str:
         """
         Transcribe texto inglés a notación IPA.
         
         Args:
             text (str): Texto en inglés para transcribir
             accent (str): Variante de acento ("rp" para Received Pronunciation)
+            use_weak_forms (bool): Si aplicar formas débiles
         
         Returns:
             str: Transcripción IPA del texto
@@ -41,9 +42,9 @@ class PhoneticTranscriptionImplements(PhoneticTranscriptionInterface):
             
             # Transcribir según el acento usando servicios específicos
             if accent == "rp":
-                return transcribe_to_rp_ipa(text)
+                return transcribe_to_rp_ipa(text, use_weak_forms)
             elif accent == "american":
-                return transcribe_to_american_ipa(text)
+                return transcribe_to_american_ipa(text, use_weak_forms)
             else:
                 raise ValueError(f"Acento '{accent}' no implementado")
                 

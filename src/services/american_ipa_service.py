@@ -6,6 +6,7 @@ from phonemizer import phonemize
 from typing import Optional
 import eng_to_ipa as ipa
 import re
+from .weak_forms_processor import process_weak_forms_in_transcription
 
 
 def transform_symbols(text: str) -> str:
@@ -50,13 +51,14 @@ class AmericanIPAService:
         self.backend = 'espeak'
         self.language = 'en-us'  # American English
     
-    def transcribe(self, text: str) -> str:
+    def transcribe(self, text: str, use_weak_forms: bool = True) -> str:
         """
         Transcribe texto inglés a notación IPA American
         Preserva los saltos de línea del texto original.
         
         Args:
             text (str): Texto en inglés para transcribir
+            use_weak_forms (bool): Si aplicar formas débiles
             
         Returns:
             str: Transcripción en notación IPA American
@@ -99,7 +101,14 @@ class AmericanIPAService:
                     raise Exception(f"Error in American IPA transcription: {str(e)}. Fallback error: {str(fallback_error)}")
         
         # Unir las líneas preservando los saltos de línea originales
-        return '\n'.join(transcribed_lines)
+        base_transcription = '\n'.join(transcribed_lines)
+        
+        # Aplicar procesamiento de formas débiles
+        final_transcription = process_weak_forms_in_transcription(
+            text, base_transcription, "american", use_weak_forms
+        )
+        
+        return final_transcription
     
     def _clean_and_americanize_ipa(self, ipa_text: str) -> str:
         """
@@ -166,14 +175,15 @@ class AmericanIPAService:
 american_ipa_service = AmericanIPAService()
 
 
-def transcribe_to_american_ipa(text: str) -> str:
+def transcribe_to_american_ipa(text: str, use_weak_forms: bool = True) -> str:
     """
     Función de conveniencia para transcribir texto a American IPA
     
     Args:
         text (str): Texto en inglés para transcribir
+        use_weak_forms (bool): Si aplicar formas débiles
         
     Returns:
         str: Transcripción en notación IPA American
     """
-    return american_ipa_service.transcribe(text)
+    return american_ipa_service.transcribe(text, use_weak_forms)

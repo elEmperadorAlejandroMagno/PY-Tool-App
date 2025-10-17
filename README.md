@@ -1,4 +1,19 @@
-## 🛠️ Instalación y ejecución rápida
+# Translator Project
+
+## 📖 Descripción
+
+Aplicación de traducción especializada que permite traducir texto y archivos entre múltiples idiomas. Utiliza Google Translate API para proporcionar traducciones precisas y rápidas.
+
+## ✨ Características
+
+- 🌐 Traducción de texto entre múltiples idiomas
+- 📄 Traducción de archivos (PDF, Word, TXT)
+- 🔍 Detección automática de idioma
+- 💾 Exportación de traducciones a diferentes formatos
+- 🖥️ Interfaz gráfica intuitiva con CustomTkinter
+- 🚀 Gestión rápida con `uv`
+
+## 🛠️ Instalación y ejecución
 
 Este proyecto utiliza `uv` para la gestión de dependencias y entornos virtuales, lo que hace la instalación más rápida y sencilla.
 
@@ -17,13 +32,8 @@ pip install uv
 ### Instalación del proyecto
 
 ```bash
-# Clonar el repositorio
-git clone https://github.com/elEmperadorAlejandroMagno/Python-APP-Final-Project.git
-```
-
-```bash
 # Navegar al directorio del proyecto
-cd Python-APP-Final-Project
+cd translator-project
 ```
 
 ```bash

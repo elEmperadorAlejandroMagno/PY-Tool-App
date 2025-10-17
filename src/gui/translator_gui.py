@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from typing import Dict, Any
 from src.core.factories.translator_factory import create_translator_app
-from src.gui.tabs import TextTranslatorTab, FileTranslatorTab, IpaTranscriptionTab
+from src.gui.tabs import TextTranslatorTab, FileTranslatorTab
 
 class TranslatorGUI:
     """Interfaz gráfica principal del traductor."""
@@ -44,14 +44,12 @@ class TranslatorGUI:
         # Agregar pestañas
         self.notebook.add(self.t["translate"])
         self.notebook.add(self.t["translate_file"])
-        self.notebook.add("IPA Transcription")
         
     def _setup_tabs(self) -> None:
         """Inicializa y configura todas las pestañas."""
         # Obtener referencias a los frames de las pestañas
         text_tab_frame = self.notebook.tab(self.t["translate"])
         file_tab_frame = self.notebook.tab(self.t["translate_file"])
-        ipa_tab_frame = self.notebook.tab("IPA Transcription")
         
         # Crear e inicializar las pestañas
         self.text_tab = TextTranslatorTab(
@@ -71,13 +69,6 @@ class TranslatorGUI:
             self.output_languages
         )
         self.file_tab.render()
-        
-        self.ipa_tab = IpaTranscriptionTab(
-            ipa_tab_frame, 
-            self.app, 
-            self.t
-        )
-        self.ipa_tab.render()
 
     def run(self) -> None:
         self.root.mainloop()
